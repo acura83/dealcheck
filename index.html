@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DealCheck</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 850px; margin: 24px auto; padding: 0 16px; color: #202938; }
+    #results-box { margin: 20px 0 28px; padding: 20px; border: 1px solid #ccd5e2; border-radius: 12px; background: #f6f8fc; min-height: 150px; }
+    #results-box h2 { margin: 0 0 12px; font-size: 20px; }
+    #search-message { color: #46556b; line-height: 1.5; }
+    #shopping-results:empty::before { content: 'Your shopping results will appear here after you search.'; display: block; padding: 24px 0; color: #627086; }
+    #shopping-results ol { padding-left: 24px; }
+    #shopping-results li { background: white; overflow-wrap: anywhere; }
+  </style>
+</head>
+<body>
+  <form id="search-form" role="search"  style="padding: 16px 0;">
+    <label for="page-search">Find product deals</label>
+    <input id="page-search" name="q" type="search" required placeholder="Enter an item, brand, or model" style="padding: 8px; width: min(70%, 320px);">
+    <button type="submit">Find deals</button>
+  </form>
+  <small>Top shopping results, not guaranteed cheapest. Check model, size, shipping, and price at the store.</small>
+  <section id="results-box" aria-labelledby="results-heading">
+    <h2 id="results-heading">Shopping results</h2>
+    <p id="search-message" role="status" aria-live="polite"></p>
+    <div id="shopping-results"></div>
+  </section>
+
+
+
+  <label>
+    Original price ($):
+    <input id="price" type="number" min="0" step="0.01">
+  </label>
+  <br><br>
+
+  <label>
+    Percentage off (%):
+    <input id="percent" type="number" min="0" max="100">
+  </label>
+  <br><br>
+
+  <label>
+    Dollars off ($):
+    <input id="dollars" type="number" min="0" step="0.01">
+  </label>
+  <br><br>
+
+  <button id="compare" type="button">Compare deals</button>
+  <div id="result" role="status" aria-live="polite"></div>
+  <p><small>Compares two separate offers on the same original price. Tax and shipping are excluded.</small></p>
+
+  <script>
+    // The browser asks our server; the private API key stays on the server.
+    const searchInput = document.getElementById('page-search');
+    const searchMessage = document.getElementById('search-message');
+    const shoppingResults = document.getElementById('shopping-results');
+    document.getElementById('search-form').addEventListener('submit', async event => {
+      event.preventDefault();
+      const query = searchInput.value.trim();
+      if (!query) { searchMessage.textContent = 'Enter an item name.'; return; }
+      if (location.protocol === 'file:') { searchMessage.textContent = 'Start the local server and open http://127.0.0.1:3000 to search.'; return; }
+      const button = event.currentTarget.querySelector('button');
+      button.disabled = true;
+      searchMessage.textContent = 'Searching shopping offers…';
+      shoppingResults.replaceChildren();
+      try {
+        const response = await fetch('/api/search?q=' + encodeURIComponent(query));
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Search failed.');
+        searchMessage.textContent = data.results.length ? 'Top ' + data.results.length + ' shopping results · Retrieved ' + new Date(data.searchedAt).toLocaleString() : 'No results found. Try a more specific brand or model.';
+        const list = document.createElement('ol');
+        data.results.forEach(item => {
+          const card = document.createElement('li');
+          card.style.cssText = 'padding:16px;margin:12px 0;border:1px solid #ddd;border-radius:8px;';
+          if (item.image) {
+            const img = document.createElement('img');
+            img.src = item.image; img.alt = item.title; img.loading = 'lazy'; img.referrerPolicy = 'no-referrer';
+            img.style.cssText = 'width:80px;height:80px;object-fit:contain;';
+            img.addEventListener('error', () => img.remove()); card.append(img);
+          }
+          const title = document.createElement('p'); title.textContent = item.title;
+          const info = document.createElement('p'); info.textContent = item.price + ' — ' + item.store;
+          card.append(title, info);
+          if (item.delivery) { const shipping = document.createElement('p'); shipping.textContent = item.delivery; card.append(shipping); }
+          if (item.link) { const link = document.createElement('a'); link.href = item.link; link.target = '_blank'; link.rel = 'noopener noreferrer'; link.textContent = 'View offer'; card.append(link); }
+          list.append(card);
+        });
+        shoppingResults.append(list);
+      } catch (error) { searchMessage.textContent = error.message; }
+      finally { button.disabled = false; }
+    });
+    // Get the input boxes and the place where we show the answer.
+    const priceInput = document.getElementById('price');
+    const percentInput = document.getElementById('percent');
+    const dollarsInput = document.getElementById('dollars');
+    const result = document.getElementById('result');
+
+    function money(cents) {
+      return '$' + (cents / 100).toFixed(2);
+    }
+
+    function compareDeals() {
+      // Empty boxes must not be treated as zero.
+      const inputs = [priceInput, percentInput, dollarsInput];
+      if (inputs.some(input => input.value.trim() === '')) {
+        result.textContent = 'Please fill in all three boxes. You can enter 0 for no discount.';
+        return;
+      }
+
+      const price = Number(priceInput.value);
+      const percent = Number(percentInput.value);
+      const dollars = Number(dollarsInput.value);
+
+      if (![price, percent, dollars].every(Number.isFinite) ||
+          inputs.some(input => !input.validity.valid)) {
+        result.textContent = 'Use a nonnegative price and dollar discount, and a percentage from 0 to 100. Dollar amounts must use at most two decimal places.';
+        return;
+      }
+      if (price <= 0) {
+        result.textContent = 'The original price must be greater than $0.';
+        return;
+      }
+      if (dollars > price) {
+        result.textContent = 'The dollar discount cannot be greater than the original price.';
+        return;
+      }
+
+      // Calculate in whole cents and round each final price to the nearest cent.
+      const priceCents = Math.round(price * 100);
+      const dollarsCents = Math.round(dollars * 100);
+      const percentFinal = Math.round(priceCents * (100 - percent) / 100);
+      const dollarsFinal = priceCents - dollarsCents;
+      const difference = Math.abs(percentFinal - dollarsFinal);
+
+      let winner;
+      if (percentFinal < dollarsFinal) {
+        winner = 'The percentage-off deal is cheaper by ' + money(difference) + '.';
+      } else if (dollarsFinal < percentFinal) {
+        winner = 'The dollar-off deal is cheaper by ' + money(difference) + '.';
+      } else {
+        winner = 'Both deals cost the same after rounding to cents.';
+      }
+
+      // Create text elements so user input is never inserted as HTML.
+      result.replaceChildren();
+      const lines = [
+        percent + '% off: ' + money(percentFinal) + ' (saves ' + money(priceCents - percentFinal) + ')',
+        money(dollarsCents) + ' off: ' + money(dollarsFinal) + ' (saves ' + money(dollarsCents) + ')',
+        winner
+      ];
+      lines.forEach(line => {
+        const paragraph = document.createElement('p');
+        paragraph.textContent = line;
+        result.appendChild(paragraph);
+      });
+    }
+
+    document.getElementById('compare').addEventListener('click', compareDeals);
+    // Clear an old answer whenever the numbers change.
+    [priceInput, percentInput, dollarsInput].forEach(input => {
+      input.addEventListener('input', () => { result.textContent = ''; });
+    });
+  </script>
+</body>
+</html>
+
+
