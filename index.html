@@ -1,12 +1,24 @@
 <!doctype html>
 <html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DealCheck · Compare product deals</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#f5f7fa;color:#17273b;font-family:Segoe UI,Arial,sans-serif}header{background:#fff;border-bottom:1px solid #e4e9f0}nav{max-width:1100px;margin:auto;display:flex;align-items:center;justify-content:space-between;padding:22px 24px}.brand{font-size:23px;font-weight:750;letter-spacing:-1px}.brand span{color:#187c69}.badge{font-size:12px;background:#e9f4ef;color:#236954;padding:7px 12px;border-radius:20px}main{max-width:1100px;margin:auto;padding:48px 24px}.eyebrow{color:#187c69;font-size:12px;font-weight:700;letter-spacing:2px}h1{font-size:clamp(32px,5vw,48px);letter-spacing:-1.8px;margin:12px 0}p{line-height:1.6}.intro{color:#667588;max-width:580px}.layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(280px,1fr);gap:24px;margin-top:32px}.card{background:white;border:1px solid #e2e8ef;border-radius:18px;padding:28px;box-shadow:0 8px 28px #22354b05}h2{font-size:20px;margin:0 0 8px}.hint,small{color:#718094;font-size:13px;line-height:1.6}label{display:block;font-size:13px;font-weight:600;margin:20px 0 8px}input{width:100%;padding:14px;border:1px solid #d7dfe8;border-radius:9px;font:inherit;background:#fcfdff}input:focus{outline:3px solid #187c6920;border-color:#187c69}button{border:0;border-radius:9px;background:#187c69;color:white;font:inherit;font-weight:600;padding:14px 20px;cursor:pointer}button:hover{background:#116654}button:disabled{opacity:.5;cursor:wait}.search-row{display:flex;gap:10px}.search-row input{min-width:0}.search-row button{white-space:nowrap}.results{border-top:1px solid #edf0f4;margin-top:24px;padding-top:24px}.results h2{font-size:15px}#shopping-results:empty:before{content:'Search an item to explore available offers.';display:block;text-align:center;color:#8490a2;padding:60px 15px;border:1px dashed #dfe5ed;border-radius:12px;background:#fafbfd;margin-top:16px}#shopping-results ol{padding-left:22px}#shopping-results li{background:#fafbfd}#search-message{font-size:13px;color:#667588}#compare{width:100%;margin-top:22px}#result:not(:empty){background:#edf7f2;padding:16px;border-radius:10px;margin-top:18px;font-size:14px}.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}footer{font-size:12px;color:#7d8999;margin-top:30px}.note{margin-top:22px;border-top:1px solid #edf0f4;padding-top:16px}@media(max-width:760px){.layout{grid-template-columns:1fr}main{padding:30px 16px}.card{padding:22px}.search-row{flex-direction:column}}
+*{box-sizing:border-box}body{margin:0;background:#f5f7fa;color:#17273b;font-family:Segoe UI,Arial,sans-serif}header{background:#fff;border-bottom:1px solid #e4e9f0}nav{max-width:1100px;margin:auto;display:flex;align-items:center;justify-content:space-between;padding:22px 24px}.brand{font-size:23px;font-weight:750;letter-spacing:-1px}.brand span{color:#187c69}.badge{font-size:12px;background:#e9f4ef;color:#236954;padding:7px 12px;border-radius:20px}main{max-width:1100px;margin:auto;padding:48px 24px}.eyebrow{color:#187c69;font-size:12px;font-weight:700;letter-spacing:2px}h1{font-size:clamp(32px,5vw,48px);letter-spacing:-1.8px;margin:12px 0}p{line-height:1.6}.intro{color:#667588;max-width:580px}.layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(280px,1fr);gap:24px;margin-top:32px}.card{background:white;border:1px solid #e2e8ef;border-radius:18px;padding:28px;box-shadow:0 8px 28px #22354b05}h2{font-size:20px;margin:0 0 8px}.hint,small{color:#718094;font-size:13px;line-height:1.6}label{display:block;font-size:13px;font-weight:600;margin:20px 0 8px}input{width:100%;padding:14px;border:1px solid #d7dfe8;border-radius:9px;font:inherit;background:#fcfdff}input:focus{outline:3px solid #187c6920;border-color:#187c69}button{border:0;border-radius:9px;background:#187c69;color:white;font:inherit;font-weight:600;padding:14px 20px;cursor:pointer}button:hover{background:#116654}button:disabled{opacity:.5;cursor:wait}.search-row{display:flex;gap:10px}.search-row input{min-width:0}.search-row button{white-space:nowrap}.results{border-top:1px solid #edf0f4;margin-top:24px;padding-top:24px}.results h2{font-size:15px}#shopping-results:empty:before{content:'Search an item to explore available offers.';display:block;text-align:center;color:#8490a2;padding:60px 15px;border:1px dashed #dfe5ed;border-radius:12px;background:#fafbfd;margin-top:16px}#shopping-results ol{padding-left:22px}#shopping-results li{background:#fafbfd}#search-message{font-size:13px;color:#667588}#compare{width:100%;margin-top:22px}#result:not(:empty){background:#edf7f2;padding:16px;border-radius:10px;margin-top:18px;font-size:14px}.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}footer{font-size:12px;color:#7d8999;margin-top:30px}.note{margin-top:22px;border-top:1px solid #edf0f4;padding-top:16px}@media(max-width:760px){.layout{grid-template-columns:1fr}main{padding:30px 16px}.two{grid-template-columns:1fr}.card{padding:22px}.search-row{flex-direction:column}}
 </style></head><body>
 <header><nav><div class="brand">Deal<span>Check</span></div><span class="badge">Shop smarter</span></nav></header>
 <main><div class="eyebrow">MAKE EVERY DOLLAR COUNT</div><h1>Good deals. Clear decisions.</h1><p class="intro">Explore product offers and compare discounts with simple numbers, so you can choose with confidence.</p>
 <div class="layout"><section class="card"><h2>Find product deals</h2><p class="hint">Search by item, brand, or exact model.</p><form id="search-form" role="search"><label for="page-search">What are you shopping for?</label><div class="search-row"><input id="page-search" name="q" type="search" required maxlength="200" placeholder="e.g. Got2b Glued Spray 2 oz"><button type="submit">Find deals</button></div></form><section class="results" id="results-box" aria-labelledby="results-heading"><h2 id="results-heading">Shopping results</h2><p id="search-message" role="status" aria-live="polite"></p><div id="shopping-results"></div></section><div class="note"><small>Search order does not guarantee the lowest price. Check product size, shipping, and availability with the retailer.</small></div></section>
 <section class="card"><h2>Which discount wins?</h2><p class="hint">Compare two offers on the same item.</p><label for="price">Original price ($)</label><input id="price" type="number" min="0" step="0.01" placeholder="30.00"><div class="two"><div><label for="percent">Percent off (%)</label><input id="percent" type="number" min="0" max="100" placeholder="20"></div><div><label for="dollars">Dollars off ($)</label><input id="dollars" type="number" min="0" step="0.01" placeholder="5.00"></div></div><button id="compare" type="button">Compare discounts</button><div id="result" role="status" aria-live="polite"></div><p class="hint">Try $30 with 20% off versus $5 off.</p><div class="note"><small>Offers are compared separately. Tax and shipping are excluded.</small></div></section></div>
+<section class="card" style="margin-top:24px" aria-labelledby="true-cost-heading">
+<h2 id="true-cost-heading">Compare the true cost</h2>
+<p class="hint">Compare the same product at two stores. Enter the price for the entire package, then its item count or size. Discounts apply to the product price, before shipping.</p>
+<form id="true-cost-form">
+<label for="unit">Compare by</label><select id="unit" style="padding:12px;border:1px solid #d7dfe8;border-radius:9px"><option value="item">Item count</option><option value="oz">Ounces (oz)</option><option value="g">Grams (g)</option><option value="ml">Milliliters (ml)</option></select>
+<div class="two" id="offer-fields"></div>
+<button type="submit" style="margin-top:24px">Compare true costs</button>
+<button type="button" id="example" style="margin-top:12px;background:#eef3f0;color:#187c69">Try an example</button>
+</form>
+<div id="true-cost-result" role="status" aria-live="polite" style="margin-top:20px"></div>
+<p class="hint">Totals include entered shipping but exclude tax and other fees. Compare equivalent products and enter both quantities in the selected unit. A lower unit price can require buying more.</p>
+</section>
 <footer>DealCheck · Thoughtful shopping starts with a clear comparison.</footer></main>
 <script>
     // The browser asks our server; the private API key stays on the server.
@@ -120,5 +132,71 @@
       input.addEventListener('input', () => { result.textContent = ''; });
     });
   </script>
+<script>
+// Calculate final product price in cents, then add shipping. Never discount shipping.
+function calculateOffer(price, discountType, discount, shipping, quantity) {
+  if (![price, discount, shipping, quantity].every(Number.isFinite) || price <= 0 || discount < 0 || shipping < 0 || quantity <= 0) throw new Error('Enter a positive product price and quantity, with nonnegative shipping and discounts.');
+  if (discountType === 'percent' && discount > 100) throw new Error('A percentage discount cannot exceed 100%.');
+  if (discountType === 'dollars' && discount > price) throw new Error('A dollar discount cannot exceed the product price.');
+  const cents = Math.round(price * 100);
+  const product = discountType === 'percent' ? Math.round(cents * (100 - discount) / 100) : cents - Math.round(discount * 100);
+  const total = product + Math.round(shipping * 100);
+  return {product, total, perUnit:total / quantity, quantity};
+}
+const offerFields = document.getElementById('offer-fields');
+['a','b'].forEach(id => {
+  const fieldset = document.createElement('fieldset');
+  fieldset.style.cssText = 'border:1px solid #e2e8ef;border-radius:12px;padding:20px;margin:20px 0 0;min-width:0;';
+  fieldset.innerHTML = `<legend>Offer ${id.toUpperCase()}</legend>
+  <label for="${id}-price">Package price before discount ($)</label><input id="${id}-price" type="number" required min="0.01" max="1000000" step="0.01" placeholder="20.00">
+  <label for="${id}-type">Discount type</label><select id="${id}-type" style="padding:12px;width:100%;border-radius:9px;border:1px solid #d7dfe8"><option value="percent">Percentage off (%)</option><option value="dollars">Dollars off ($)</option></select>
+  <label for="${id}-discount">Discount amount (0 for none)</label><input id="${id}-discount" type="number" required min="0" step="0.01" value="0">
+  <label for="${id}-shipping">Shipping ($; 0 for free)</label><input id="${id}-shipping" type="number" required min="0" max="1000000" step="0.01" value="0">
+  <label for="${id}-quantity" class="quantity-label">Number of items in the package</label><input id="${id}-quantity" type="number" required min="1" max="1000000" step="1" value="1">`;
+  offerFields.append(fieldset);
+});
+const costForm = document.getElementById('true-cost-form');
+const costResult = document.getElementById('true-cost-result');
+const unitSelect = document.getElementById('unit');
+function updateUnit() {
+  ['a','b'].forEach(id => {
+    const quantity = document.getElementById(id + '-quantity');
+    quantity.min = unitSelect.value === 'item' ? '1' : '0.001';
+    quantity.step = unitSelect.value === 'item' ? '1' : '0.001';
+    document.querySelector('label[for="' + id + '-quantity"]').textContent = unitSelect.value === 'item' ? 'Number of items in the package' : 'Package size (' + unitSelect.value + ')';
+  });
+}
+unitSelect.addEventListener('change', updateUnit);
+costForm.addEventListener('input', () => costResult.replaceChildren());
+costForm.addEventListener('change', () => costResult.replaceChildren());
+costForm.addEventListener('submit', event => {
+  event.preventDefault();
+  costResult.replaceChildren();
+  try {
+    const offers = ['a','b'].map(id => calculateOffer(
+      Number(document.getElementById(id+'-price').value), document.getElementById(id+'-type').value,
+      Number(document.getElementById(id+'-discount').value), Number(document.getElementById(id+'-shipping').value), Number(document.getElementById(id+'-quantity').value)));
+    const [a,b] = offers;
+    const currency = cents => '$' + (cents / 100).toFixed(2);
+    const unit = unitSelect.value;
+    const line = text => { const p = document.createElement('p'); p.textContent = text; costResult.append(p); };
+    costResult.style.cssText = 'margin-top:20px;background:#edf7f2;padding:20px;border-radius:12px;';
+    offers.forEach((offer,i) => line('Offer ' + (i === 0 ? 'A' : 'B') + ': product after discount ' + currency(offer.product) + ' · Total including shipping ' + currency(offer.total) + ' · ' + currency(offer.perUnit) + ' per ' + unit));
+    line(a.total === b.total ? 'Lowest spending: both totals are equal.' : 'Lowest spending: Offer ' + (a.total < b.total ? 'A' : 'B') + ' costs ' + currency(Math.abs(a.total-b.total)) + ' less today.');
+    // Compare unrounded unit prices; round only when displaying the difference.
+    const delta = a.perUnit - b.perUnit;
+    line(Math.abs(delta) < 0.000001 ? 'Value per unit: both offers are equal.' : 'Best value per ' + unit + ': Offer ' + (delta < 0 ? 'A' : 'B') + '.');
+    if ((a.total < b.total && a.perUnit > b.perUnit) || (b.total < a.total && b.perUnit > a.perUnit)) line('Tradeoff: the lower unit price requires spending more overall. Choose based on how much you actually need.');
+    line('Unit cost = (discounted package price + shipping) ÷ package quantity. Displayed amounts are rounded; small unit-price differences may look equal.');
+  } catch(error) { costResult.textContent = error.message; }
+});
+document.getElementById('example').addEventListener('click', () => {
+  unitSelect.value = 'item'; updateUnit();
+  const examples = {a:[20,'percent',20,5,2],b:[24,'percent',0,0,3]};
+  Object.entries(examples).forEach(([id,values]) => ['price','type','discount','shipping','quantity'].forEach((field,i) => document.getElementById(id+'-'+field).value = values[i]));
+  costForm.requestSubmit();
+});
+</script>
 </body></html>
+
 
