@@ -46,13 +46,20 @@ h1{font-size:34px;margin:8px 0}.intro{margin:8px 0;max-width:800px}
       const quantity = raw === 'kg' ? amount * 1000 : amount;
       return foundUnit === unit && quantity > 0 ? quantity : null;
     }
+    function readListedPrice(item) {
+      // Accept a numeric provider price or one explicit USD price, never a range/payment.
+      if (Number.isFinite(item.numericPrice) && item.numericPrice >= 0) return item.numericPrice;
+      const match = String(item.price || '').trim().match(/^(?:US\s*)?\$\s*(\d+(?:,\d{3})*(?:\.\d{1,2})?)$/);
+      return match ? Number(match[1].replace(/,/g, '')) : null;
+    }
     function rankOffers(offers, query, strict, sortMode = 'price', unit = 'oz') {
       const words = text => (text.toLowerCase().match(/[a-z0-9]+/g) || []);
       const terms = words(query);
       const seen = new Set();
       return offers.map(item => {
         const quantity = getUnitQuantity(item.title, unit);
-        return {...item, unitQuantity:quantity, unitPrice:quantity && Number.isFinite(item.numericPrice) ? item.numericPrice / quantity : null};
+        const numericPrice = readListedPrice(item);
+        return {...item, numericPrice, unitQuantity:quantity, unitPrice:quantity && Number.isFinite(numericPrice) ? numericPrice / quantity : null};
       }).filter(item => {
         const titleWords = new Set(words(item.title));
         if (strict && !terms.every(term => titleWords.has(term))) return false;
@@ -130,7 +137,7 @@ h1{font-size:34px;margin:8px 0}.intro{margin:8px 0;max-width:800px}
             badge.style.color = '#187c69';
             card.prepend(badge);
           }
-          if (item.delivery) { const shipping = document.createElement('p'); shipping.textContent = parseShipping(item.delivery) === 0 ? 'Shipping cost: .00 (free shipping)' : item.delivery; card.append(shipping); }
+          if (item.delivery) { const shipping = document.createElement('p'); shipping.textContent = parseShipping(item.delivery) === 0 ? 'Shipping cost: $0.00 (free shipping)' : item.delivery; card.append(shipping); }
           if (item.link) { const link = document.createElement('a'); link.href = item.link; link.target = '_blank'; link.rel = 'noopener noreferrer'; link.textContent = 'View offer'; card.append(link); }
           list.append(card);
         });
@@ -153,7 +160,8 @@ function parseShipping(text) {
   return match ? Math.round(Number(match[1].replace(/,/g,''))*100) : null;
 }
 function offerCosts(item, shipping) {
-  const price = Number.isFinite(item.numericPrice) ? Math.round(item.numericPrice * 100) : null;
+  const listedPrice = readListedPrice(item);
+  const price = listedPrice !== null ? Math.round(listedPrice * 100) : null;
   const original = Number.isFinite(item.originalPrice) ? Math.round(item.originalPrice*100) : null;
   return {price, savings:price !== null && original !== null && original >= price ? original-price : null,
     total:price !== null && shipping !== null ? price+shipping : null};
