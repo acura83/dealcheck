@@ -54,7 +54,7 @@ const server = http.createServer(async (req, res) => {
     const safeUrl = value => { try { const u = new URL(value); return u.protocol === 'https:' ? u.href : ''; } catch { return ''; } };
     const results = (body.shopping_results || []).map(item => ({
       title:item.title || 'Product', store:item.source || 'Store not listed', price:item.price || 'Price not listed',
-      numericPrice:(!item.installment && typeof item.extracted_price === 'number' && Number.isFinite(item.extracted_price) && item.extracted_price > 0 && /\\$/.test(item.price || '')) ? item.extracted_price : null, delivery:item.delivery || '', image:safeUrl(item.thumbnail), link:safeUrl(item.product_link || item.link)
+      numericPrice:(!item.installment && typeof item.extracted_price === 'number' && Number.isFinite(item.extracted_price) && item.extracted_price > 0 && /\\$/.test(item.price || '')) ? item.extracted_price : null, originalPrice:typeof item.extracted_old_price === 'number' && Number.isFinite(item.extracted_old_price) && /\\$/.test(item.old_price || '') ? item.extracted_old_price : null, delivery:item.delivery || '', image:safeUrl(item.thumbnail), link:safeUrl(item.product_link || item.link)
     }));
     const data = {results, searchedAt:new Date().toISOString()};
     cache.set(query.toLowerCase(), {time:Date.now(), data});
@@ -64,5 +64,6 @@ const server = http.createServer(async (req, res) => {
 });
 server.on('error', () => { console.error('Could not start. Port 3000 may already be in use.'); });
 server.listen(Number(process.env.PORT) || 3000, '0.0.0.0', () => console.log('DealCheck server is running.'));
+
 
 

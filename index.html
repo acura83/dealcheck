@@ -20,16 +20,11 @@ h1{font-size:34px;margin:8px 0}.intro{margin:8px 0;max-width:800px}
 <p class="hint">For unit-price searches, enter brand and product without a size to compare different packages. Sizes are read from titles; verify them with the retailer. Multipacks and unclear sizes are not ranked by unit price.</p><p class="hint">For closer matches, include brand, model, size, and quantity. Results are sorted by listed item price; shipping and taxes are not included.</p></form><section class="results" id="results-box" aria-labelledby="results-heading"><h2 id="results-heading">Shopping results</h2><p id="search-message" role="status" aria-live="polite"></p><div id="shopping-results"></div></section><div class="note"><small>Lowest listed price among matching returned offers—not every store. Title matching cannot verify product equivalence. Check product size, shipping, and availability with the retailer.</small></div></section>
 <section class="card" aria-labelledby="true-cost-heading">
 <h2 id="true-cost-heading">Compare the true cost</h2>
-<p class="hint">Compare the same product at two stores. Enter the price for the entire package, then its item count or size. Discounts apply to the product price, before shipping.</p>
-<form id="true-cost-form">
-<label for="unit">Compare by</label><select id="unit" style="padding:12px;border:1px solid #d7dfe8;border-radius:9px"><option value="item">Item count</option><option value="oz">Ounces (oz)</option><option value="g">Grams (g)</option><option value="ml">Milliliters (ml)</option></select>
-<div class="two" id="offer-fields"></div>
-<button type="submit" style="margin-top:24px">Compare true costs</button>
-<button type="button" id="example" style="margin-top:12px;background:#eef3f0;color:#187c69">Try an example</button>
-</form>
-<div id="true-cost-result" role="status" aria-live="polite" style="margin-top:20px"></div>
-<p class="hint">Totals include entered shipping but exclude tax and other fees. Compare equivalent products and enter both quantities in the selected unit. A lower unit price can require buying more.</p>
-</section>
+<p class="hint">Check items in shopping results to compare their listed prices and shipping side by side.</p>
+<button id="clear-selection" type="button" style="background:#eef3f0;color:#187c69">Clear selected items</button>
+<div id="selected-offers" style="margin-top:20px"></div>
+<p id="selection-status" role="status" aria-live="polite"></p>
+<p class="hint">Listed prices already include any advertised markdown; savings are not deducted again. Enter verified shipping when it is unknown. Totals exclude tax and other fees. Compare equivalent products and sizes.</p></section>
 </div><footer>DealCheck · Thoughtful shopping starts with a clear comparison.</footer></main>
 <script>
     // Match words against titles, deduplicate offers, and sort known prices first.
@@ -106,6 +101,20 @@ h1{font-size:34px;margin:8px 0}.intro{margin:8px 0;max-width:800px}
           const title = document.createElement('p'); title.textContent = item.title;
           const info = document.createElement('p'); info.textContent = item.price + ' — ' + item.store;
           card.append(title, info);
+          const chooseLabel = document.createElement('label');
+          chooseLabel.style.cssText = 'display:flex;align-items:center;gap:8px;';
+          const choose = document.createElement('input');
+          choose.type = 'checkbox'; choose.style.width = 'auto';
+          const offerKey = makeOfferKey(item);
+          choose.dataset.offerKey = offerKey;
+          choose.checked = selectedOffers.has(offerKey);
+          choose.addEventListener('change', () => {
+            if (choose.checked) selectedOffers.set(offerKey, {item, shipping:parseShipping(item.delivery)});
+            else selectedOffers.delete(offerKey);
+            renderSelectedOffers();
+          });
+          chooseLabel.append(choose, document.createTextNode('Compare this item'));
+          card.append(chooseLabel);
           if (sortMode === 'unit') {
             const unitInfo = document.createElement('p');
             unitInfo.textContent = Number.isFinite(item.unitPrice) ? '$' + item.unitPrice.toFixed(4) + ' per ' + searchUnit + ' · Size read from title: ' + item.unitQuantity + ' ' + searchUnit : 'Unit price unavailable: size or price needs verification.';
@@ -117,7 +126,7 @@ h1{font-size:34px;margin:8px 0}.intro{margin:8px 0;max-width:800px}
             badge.style.color = '#187c69';
             card.prepend(badge);
           }
-          if (item.delivery) { const shipping = document.createElement('p'); shipping.textContent = item.delivery; card.append(shipping); }
+          if (item.delivery) { const shipping = document.createElement('p'); shipping.textContent = parseShipping(item.delivery) === 0 ? 'Shipping cost: .00 (free shipping)' : item.delivery; card.append(shipping); }
           if (item.link) { const link = document.createElement('a'); link.href = item.link; link.target = '_blank'; link.rel = 'noopener noreferrer'; link.textContent = 'View offer'; card.append(link); }
           list.append(card);
         });
@@ -126,72 +135,68 @@ h1{font-size:34px;margin:8px 0}.intro{margin:8px 0;max-width:800px}
       finally { button.disabled = false; }
     });
 </script>
+
 <script>
-// Calculate final product price in cents, then add shipping. Never discount shipping.
-function calculateOffer(price, discountType, discount, shipping, quantity) {
-  if (![price, discount, shipping, quantity].every(Number.isFinite) || price <= 0 || discount < 0 || shipping < 0 || quantity <= 0) throw new Error('Enter a positive product price and quantity, with nonnegative shipping and discounts.');
-  if (discountType === 'percent' && discount > 100) throw new Error('A percentage discount cannot exceed 100%.');
-  if (discountType === 'dollars' && discount > price) throw new Error('A dollar discount cannot exceed the product price.');
-  const cents = Math.round(price * 100);
-  const product = discountType === 'percent' ? Math.round(cents * (100 - discount) / 100) : cents - Math.round(discount * 100);
-  const total = product + Math.round(shipping * 100);
-  return {product, total, perUnit:total / quantity, quantity};
+const selectedOffers = new Map();
+function makeOfferKey(item) { return [item.title,item.store,item.price,item.link].join('|'); }
+function parseShipping(text) {
+  // Conditional free shipping does not establish a known cost for this offer.
+  const cleaned = (text || '').trim();
+    const freeShipping = /\bfree\s+(?:shipping|delivery)\b|\b(?:shipping|delivery)\s*:\s*free\b/i.test(cleaned);
+  const conditional = /\b(?:over|above|minimum|orders?|when|with|if|eligible|qualifying|members?|membership|subscription|prime)\b|\$\s*\d/i.test(cleaned);
+  if (freeShipping && !conditional) return 0;
+  const match = cleaned.match(/^\$([\d,]+(?:\.\d{1,2})?)\s+(shipping|delivery)[.!]?$/i);
+  return match ? Math.round(Number(match[1].replace(/,/g,''))*100) : null;
 }
-const offerFields = document.getElementById('offer-fields');
-['a','b'].forEach(id => {
-  const fieldset = document.createElement('fieldset');
-  fieldset.style.cssText = 'border:1px solid #e2e8ef;border-radius:12px;padding:20px;margin:20px 0 0;min-width:0;';
-  fieldset.innerHTML = `<legend>Offer ${id.toUpperCase()}</legend>
-  <label for="${id}-price">Package price before discount ($)</label><input id="${id}-price" type="number" required min="0.01" max="1000000" step="0.01" placeholder="20.00">
-  <label for="${id}-type">Discount type</label><select id="${id}-type" style="padding:12px;width:100%;border-radius:9px;border:1px solid #d7dfe8"><option value="percent">Percentage off (%)</option><option value="dollars">Dollars off ($)</option></select>
-  <label for="${id}-discount">Discount amount (0 for none)</label><input id="${id}-discount" type="number" required min="0" step="0.01" value="0">
-  <label for="${id}-shipping">Shipping ($; 0 for free)</label><input id="${id}-shipping" type="number" required min="0" max="1000000" step="0.01" value="0">
-  <label for="${id}-quantity" class="quantity-label">Number of items in the package</label><input id="${id}-quantity" type="number" required min="1" max="1000000" step="1" value="1">`;
-  offerFields.append(fieldset);
-});
-const costForm = document.getElementById('true-cost-form');
-const costResult = document.getElementById('true-cost-result');
-const unitSelect = document.getElementById('unit');
-function updateUnit() {
-  ['a','b'].forEach(id => {
-    const quantity = document.getElementById(id + '-quantity');
-    quantity.min = unitSelect.value === 'item' ? '1' : '0.001';
-    quantity.step = unitSelect.value === 'item' ? '1' : '0.001';
-    document.querySelector('label[for="' + id + '-quantity"]').textContent = unitSelect.value === 'item' ? 'Number of items in the package' : 'Package size (' + unitSelect.value + ')';
+function offerCosts(item, shipping) {
+  const price = Number.isFinite(item.numericPrice) ? Math.round(item.numericPrice * 100) : null;
+  const original = Number.isFinite(item.originalPrice) ? Math.round(item.originalPrice*100) : null;
+  return {price, savings:price !== null && original !== null && original >= price ? original-price : null,
+    total:price !== null && shipping !== null ? price+shipping : null};
+}
+const cash = cents => cents === null ? 'Unknown' : '$'+(cents/100).toFixed(2);
+function renderSelectedOffers() {
+  const box = document.getElementById('selected-offers');
+  box.replaceChildren();
+  if (!selectedOffers.size) {
+    const empty = document.createElement('p');empty.className='hint';empty.textContent='No items selected. Check “Compare this item” in the shopping results.';box.append(empty);
+  }
+  selectedOffers.forEach((entry,key) => {
+    const card=document.createElement('article');card.style.cssText='border:1px solid #e2e8ef;border-radius:12px;padding:18px;margin-bottom:14px;';
+    const heading=document.createElement('h3');heading.textContent=entry.item.title;heading.style.margin='0 0 8px';
+    const store=document.createElement('p');store.textContent=entry.item.store;store.className='hint';card.append(heading,store);
+    const costs=offerCosts(entry.item,entry.shipping);
+    const line=text=>{const p=document.createElement('p');p.textContent=text;card.append(p);};
+    line('Price: '+cash(costs.price));
+    line('Saved cost: '+(costs.savings===null?'Not reported':cash(costs.savings)+' versus listed original price'));
+    line('Shipping cost: '+cash(entry.shipping));
+    line('Total price: '+(costs.total===null?'Pending — verify price and shipping':cash(costs.total)));
+    if (entry.item.delivery) line('Retailer shipping note: '+entry.item.delivery);
+    const label=document.createElement('label');label.textContent='Verify / enter shipping ($; 0 for free)';
+    const input=document.createElement('input');input.type='number';input.min='0';input.max='1000000';input.step='0.01';input.placeholder='Unknown';input.value=entry.shipping===null?'':(entry.shipping/100).toFixed(2);
+    input.addEventListener('change',()=>{
+      if (!input.validity.valid) {input.reportValidity();return;}
+      entry.shipping=input.value.trim()===''?null:Math.round(Number(input.value)*100);
+      renderSelectedOffers();
+    });
+    label.append(input);card.append(label);
+    const remove=document.createElement('button');remove.type='button';remove.textContent='Remove';remove.style.marginTop='12px';
+    remove.addEventListener('click',()=>{selectedOffers.delete(key);syncSelectionBoxes();renderSelectedOffers();});card.append(remove);box.append(card);
   });
+  const totals=[...selectedOffers.values()].map(entry=>offerCosts(entry.item,entry.shipping).total);
+  const known=totals.filter(total=>total!==null);
+  const status=document.getElementById('selection-status');
+  status.textContent=selectedOffers.size+' item'+(selectedOffers.size===1?'':'s')+' selected.';
+  if (known.length && selectedOffers.size>1) status.textContent+=' Lowest known total: '+cash(Math.min(...known))+'.'+(known.length<totals.length?' Some totals remain unknown.':'');
 }
-unitSelect.addEventListener('change', updateUnit);
-costForm.addEventListener('input', () => costResult.replaceChildren());
-costForm.addEventListener('change', () => costResult.replaceChildren());
-costForm.addEventListener('submit', event => {
-  event.preventDefault();
-  costResult.replaceChildren();
-  try {
-    const offers = ['a','b'].map(id => calculateOffer(
-      Number(document.getElementById(id+'-price').value), document.getElementById(id+'-type').value,
-      Number(document.getElementById(id+'-discount').value), Number(document.getElementById(id+'-shipping').value), Number(document.getElementById(id+'-quantity').value)));
-    const [a,b] = offers;
-    const currency = cents => '$' + (cents / 100).toFixed(2);
-    const unit = unitSelect.value;
-    const line = text => { const p = document.createElement('p'); p.textContent = text; costResult.append(p); };
-    costResult.style.cssText = 'margin-top:20px;background:#edf7f2;padding:20px;border-radius:12px;';
-    offers.forEach((offer,i) => line('Offer ' + (i === 0 ? 'A' : 'B') + ': product after discount ' + currency(offer.product) + ' · Total including shipping ' + currency(offer.total) + ' · ' + currency(offer.perUnit) + ' per ' + unit));
-    line(a.total === b.total ? 'Lowest spending: both totals are equal.' : 'Lowest spending: Offer ' + (a.total < b.total ? 'A' : 'B') + ' costs ' + currency(Math.abs(a.total-b.total)) + ' less today.');
-    // Compare unrounded unit prices; round only when displaying the difference.
-    const delta = a.perUnit - b.perUnit;
-    line(Math.abs(delta) < 0.000001 ? 'Value per unit: both offers are equal.' : 'Best value per ' + unit + ': Offer ' + (delta < 0 ? 'A' : 'B') + '.');
-    if ((a.total < b.total && a.perUnit > b.perUnit) || (b.total < a.total && b.perUnit > a.perUnit)) line('Tradeoff: the lower unit price requires spending more overall. Choose based on how much you actually need.');
-    line('Unit cost = (discounted package price + shipping) ÷ package quantity. Displayed amounts are rounded; small unit-price differences may look equal.');
-  } catch(error) { costResult.textContent = error.message; }
-});
-document.getElementById('example').addEventListener('click', () => {
-  unitSelect.value = 'item'; updateUnit();
-  const examples = {a:[20,'percent',20,5,2],b:[24,'percent',0,0,3]};
-  Object.entries(examples).forEach(([id,values]) => ['price','type','discount','shipping','quantity'].forEach((field,i) => document.getElementById(id+'-'+field).value = values[i]));
-  costForm.requestSubmit();
-});
-</script>
-</body></html>
+function syncSelectionBoxes() {
+  document.querySelectorAll('input[data-offer-key]').forEach(input=>input.checked=selectedOffers.has(input.dataset.offerKey));
+}
+document.getElementById('clear-selection').addEventListener('click',()=>{selectedOffers.clear();syncSelectionBoxes();renderSelectedOffers();});
+renderSelectedOffers();
+</script></body></html>
+
+
 
 
 
