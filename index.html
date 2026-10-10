@@ -112,6 +112,13 @@ h1{font-size:34px;margin:8px 0}.intro{margin:8px 0;max-width:800px}
           const title = document.createElement('p'); title.textContent = item.title;
           const info = document.createElement('p'); info.textContent = item.price + ' — ' + item.store;
           card.append(title, info);
+          const markdown = offerCosts(item, null).savings;
+          if (markdown !== null && markdown > 0) {
+            const saving = document.createElement('p');
+            saving.textContent = 'Save ' + cash(markdown) + ' versus the listed original price';
+            saving.style.cssText = 'color:#187c69;font-weight:600;';
+            card.append(saving);
+          }
           const chooseLabel = document.createElement('label');
           chooseLabel.style.cssText = 'display:flex;align-items:center;gap:8px;';
           const choose = document.createElement('input');
@@ -178,9 +185,13 @@ function renderSelectedOffers() {
     const heading=document.createElement('h3');heading.textContent=entry.item.title;heading.style.margin='0 0 8px';
     const store=document.createElement('p');store.textContent=entry.item.store;store.className='hint';card.append(heading,store);
     const costs=offerCosts(entry.item,entry.shipping);
+    if (costs.savings !== null && costs.savings > 0) {
+      const saving=document.createElement('p');saving.textContent='Save '+cash(costs.savings)+' versus the listed original price';
+      saving.style.cssText='color:#187c69;font-weight:600;';card.append(saving);
+    }
     const line=text=>{const p=document.createElement('p');p.textContent=text;card.append(p);};
     line('Price: '+cash(costs.price));
-    line('Saved cost: '+(costs.savings===null?'Not reported':cash(costs.savings)+' versus listed original price'));
+
     line('Shipping cost: '+cash(entry.shipping));
     line('Total price: '+(costs.total===null?'Pending — verify price and shipping':cash(costs.total)));
     if (entry.item.delivery) line('Retailer shipping note: '+entry.item.delivery);
