@@ -75,6 +75,10 @@ h1{font-size:34px;margin:8px 0}.intro{margin:8px 0;max-width:800px}
       event.preventDefault();
       const query = searchInput.value.trim();
       if (!query) { searchMessage.textContent = 'Enter an item name.'; return; }
+      // Each submitted search starts a fresh comparison.
+      selectedOffers.clear();
+      syncSelectionBoxes();
+      renderSelectedOffers();
       if (location.protocol === 'file:') { searchMessage.textContent = 'Start the local server and open http://127.0.0.1:3000 to search.'; return; }
       const button = event.currentTarget.querySelector('button');
       button.disabled = true;
@@ -195,6 +199,7 @@ function syncSelectionBoxes() {
 document.getElementById('clear-selection').addEventListener('click',()=>{selectedOffers.clear();syncSelectionBoxes();renderSelectedOffers();});
 renderSelectedOffers();
 </script></body></html>
+
 
 
 
