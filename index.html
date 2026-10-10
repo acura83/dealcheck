@@ -20,11 +20,11 @@ h1{font-size:34px;margin:8px 0}.intro{margin:8px 0;max-width:800px}
 <p class="hint">For unit-price searches, enter brand and product without a size to compare different packages. Sizes are read from titles; verify them with the retailer. Multipacks and unclear sizes are not ranked by unit price.</p><p class="hint">For closer matches, include brand, model, size, and quantity. Results are sorted by listed item price; shipping and taxes are not included.</p></form><section class="results" id="results-box" aria-labelledby="results-heading"><h2 id="results-heading">Shopping results</h2><p id="search-message" role="status" aria-live="polite"></p><div id="shopping-results"></div></section><div class="note"><small>Lowest listed price among matching returned offers—not every store. Title matching cannot verify product equivalence. Check product size, shipping, and availability with the retailer.</small></div></section>
 <section class="card" aria-labelledby="true-cost-heading">
 <h2 id="true-cost-heading">Compare the true cost</h2>
-<p class="hint">Check items in shopping results to compare their listed prices and shipping side by side.</p>
+<p class="hint">Check items in shopping results to compare their listed product prices side by side.</p>
 <button id="clear-selection" type="button" style="background:#eef3f0;color:#187c69">Clear selected items</button>
 <div id="selected-offers" style="margin-top:20px"></div>
 <p id="selection-status" role="status" aria-live="polite"></p>
-<p class="hint">Listed prices already include any advertised markdown; savings are not deducted again. Enter verified shipping when it is unknown. Totals exclude tax and other fees. Compare equivalent products and sizes.</p></section>
+<p class="hint">Listed prices already include any advertised markdown; savings are not deducted again. Totals exclude shipping, tax, and other fees. Compare equivalent products and sizes.</p></section>
 </div><footer>DealCheck · Thoughtful shopping starts with a clear comparison.</footer></main>
 <script>
     // Match words against titles, deduplicate offers, and sort known prices first.
@@ -127,7 +127,7 @@ h1{font-size:34px;margin:8px 0}.intro{margin:8px 0;max-width:800px}
           choose.dataset.offerKey = offerKey;
           choose.checked = selectedOffers.has(offerKey);
           choose.addEventListener('change', () => {
-            if (choose.checked) selectedOffers.set(offerKey, {item, shipping:parseShipping(item.delivery)});
+            if (choose.checked) selectedOffers.set(offerKey, {item, });
             else selectedOffers.delete(offerKey);
             renderSelectedOffers();
           });
@@ -144,7 +144,6 @@ h1{font-size:34px;margin:8px 0}.intro{margin:8px 0;max-width:800px}
             badge.style.color = '#187c69';
             card.prepend(badge);
           }
-          if (item.delivery) { const shipping = document.createElement('p'); shipping.textContent = parseShipping(item.delivery) === 0 ? 'Shipping cost: $0.00 (free shipping)' : item.delivery; card.append(shipping); }
           if (item.link) { const link = document.createElement('a'); link.href = item.link; link.target = '_blank'; link.rel = 'noopener noreferrer'; link.textContent = 'View offer'; card.append(link); }
           list.append(card);
         });
@@ -157,21 +156,12 @@ h1{font-size:34px;margin:8px 0}.intro{margin:8px 0;max-width:800px}
 <script>
 const selectedOffers = new Map();
 function makeOfferKey(item) { return [item.title,item.store,item.price,item.link].join('|'); }
-function parseShipping(text) {
-  // Conditional free shipping does not establish a known cost for this offer.
-  const cleaned = (text || '').trim();
-    const freeShipping = /\bfree\s+(?:shipping|delivery)\b|\b(?:shipping|delivery)\s*:\s*free\b/i.test(cleaned);
-  const conditional = /\b(?:over|above|minimum|orders?|when|with|if|eligible|qualifying|members?|membership|subscription|prime)\b|\$\s*\d/i.test(cleaned);
-  if (freeShipping && !conditional) return 0;
-  const match = cleaned.match(/^\$([\d,]+(?:\.\d{1,2})?)\s+(shipping|delivery)[.!]?$/i);
-  return match ? Math.round(Number(match[1].replace(/,/g,''))*100) : null;
-}
-function offerCosts(item, shipping) {
+function offerCosts(item) {
   const listedPrice = readListedPrice(item);
   const price = listedPrice !== null ? Math.round(listedPrice * 100) : null;
   const original = Number.isFinite(item.originalPrice) ? Math.round(item.originalPrice*100) : null;
   return {price, savings:price !== null && original !== null && original >= price ? original-price : null,
-    total:price !== null && shipping !== null ? price+shipping : null};
+    total:price};
 }
 const cash = cents => cents === null ? 'Unknown' : '$'+(cents/100).toFixed(2);
 function renderSelectedOffers() {
@@ -184,7 +174,7 @@ function renderSelectedOffers() {
     const card=document.createElement('article');card.style.cssText='border:1px solid #e2e8ef;border-radius:12px;padding:18px;margin-bottom:14px;';
     const heading=document.createElement('h3');heading.textContent=entry.item.title;heading.style.margin='0 0 8px';
     const store=document.createElement('p');store.textContent=entry.item.store;store.className='hint';card.append(heading,store);
-    const costs=offerCosts(entry.item,entry.shipping);
+    const costs=offerCosts(entry.item);
     if (costs.savings !== null && costs.savings > 0) {
       const saving=document.createElement('p');saving.textContent='Save '+cash(costs.savings)+' versus the listed original price';
       saving.style.cssText='color:#187c69;font-weight:600;';card.append(saving);
@@ -192,25 +182,15 @@ function renderSelectedOffers() {
     const line=text=>{const p=document.createElement('p');p.textContent=text;card.append(p);};
     line('Price: '+cash(costs.price));
 
-    line('Shipping cost: '+cash(entry.shipping));
-    line('Total price: '+(costs.total===null?'Pending — verify price and shipping':cash(costs.total)));
-    if (entry.item.delivery) line('Retailer shipping note: '+entry.item.delivery);
-    const label=document.createElement('label');label.textContent='Verify / enter shipping ($; 0 for free)';
-    const input=document.createElement('input');input.type='number';input.min='0';input.max='1000000';input.step='0.01';input.placeholder='Unknown';input.value=entry.shipping===null?'':(entry.shipping/100).toFixed(2);
-    input.addEventListener('change',()=>{
-      if (!input.validity.valid) {input.reportValidity();return;}
-      entry.shipping=input.value.trim()===''?null:Math.round(Number(input.value)*100);
-      renderSelectedOffers();
-    });
-    label.append(input);card.append(label);
+    line('Total price (excluding shipping and tax): '+cash(costs.total));
     const remove=document.createElement('button');remove.type='button';remove.textContent='Remove';remove.style.marginTop='12px';
     remove.addEventListener('click',()=>{selectedOffers.delete(key);syncSelectionBoxes();renderSelectedOffers();});card.append(remove);box.append(card);
   });
-  const totals=[...selectedOffers.values()].map(entry=>offerCosts(entry.item,entry.shipping).total);
+  const totals=[...selectedOffers.values()].map(entry=>offerCosts(entry.item).total);
   const known=totals.filter(total=>total!==null);
   const status=document.getElementById('selection-status');
   status.textContent=selectedOffers.size+' item'+(selectedOffers.size===1?'':'s')+' selected.';
-  if (known.length && selectedOffers.size>1) status.textContent+=' Lowest known total: '+cash(Math.min(...known))+'.'+(known.length<totals.length?' Some totals remain unknown.':'');
+  if (known.length && selectedOffers.size>1) status.textContent+=' Lowest listed price (excluding shipping and tax): '+cash(Math.min(...known))+'.'+(known.length<totals.length?' Some totals remain unknown.':'');
 }
 function syncSelectionBoxes() {
   document.querySelectorAll('input[data-offer-key]').forEach(input=>input.checked=selectedOffers.has(input.dataset.offerKey));
