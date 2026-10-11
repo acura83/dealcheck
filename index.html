@@ -67,6 +67,18 @@ select{width:100%;padding:10px;border:1px solid #d7dfe8;border-radius:9px;backgr
 #selected-offers .comparison-actions a,#selected-offers .comparison-actions button{margin-top:0!important;min-height:28px;padding:4px 8px;font-size:11px}
 #selection-status{margin:3px 0;font-size:11px}
 @media(max-width:650px){#selected-offers>article{flex:0 0 220px}.comparison-price{font-size:15px}}
+
+button,a,input,select{transition:background-color .18s,border-color .18s,box-shadow .18s}
+#shopping-results li{transition:border-color .18s,box-shadow .18s}
+#shopping-results li.offer-selected{border-color:#187c69!important;background:#edf7f2;box-shadow:0 0 0 1px #187c69}
+.selected-count{display:inline-flex;align-items:center;justify-content:center;background:#187c69;color:white;border-radius:20px;font-size:11px;min-width:22px;padding:3px 6px;vertical-align:middle}
+.loading-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:16px}
+.loading-tile{height:200px;border-radius:12px;background:linear-gradient(100deg,#edf0f4 20%,#fafbfd 45%,#edf0f4 70%);background-size:200% 100%;animation:loading-shimmer 1.4s infinite}
+@keyframes loading-shimmer{to{background-position:-200% 0}}
+#back-top{position:fixed;right:18px;z-index:110;padding:10px 14px;box-shadow:0 4px 16px #17273b22;font-size:13px}
+#back-top[hidden]{display:none}
+@media(max-width:650px){.loading-grid{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style></head><body>
 <header><nav><div class="brand">Deal<span>Check</span></div><span class="badge">Shop smarter</span></nav></header>
 <main><div class="eyebrow">MAKE EVERY DOLLAR COUNT</div><h1>Good deals. Clear decisions.</h1><p class="intro">Explore product offers and compare discounts with simple numbers, so you can choose with confidence.</p>
@@ -78,7 +90,7 @@ select{width:100%;padding:10px;border:1px solid #d7dfe8;border-radius:9px;backgr
 </div>
 
 <section id="comparison-panel" class="card" aria-labelledby="true-cost-heading" hidden>
-<div class="comparison-heading"><h2 id="true-cost-heading">Compare item list</h2><button id="clear-selection" type="button" style="background:#eef3f0;color:#187c69">Clear selected items</button></div>
+<div class="comparison-heading"><h2 id="true-cost-heading">Compare item list <span id="selected-count" class="selected-count"></span></h2><button id="clear-selection" type="button" style="background:#eef3f0;color:#187c69">Clear selected items</button></div>
 <div class="comparison-body"><div id="selected-offers" style="margin-top:20px"></div>
 <p id="selection-status" role="status" aria-live="polite"></p>
 </div></section>
@@ -269,8 +281,8 @@ select{width:100%;padding:10px;border:1px solid #d7dfe8;border-radius:9px;backgr
         if (!response.ok) throw new Error(data.error || 'Search failed.');
         lastSearch = {data, query};
         renderSearchResults(data, query);
-      } catch (error) { searchMessage.textContent = error.message; }
-      finally { button.disabled = false; }
+      } catch (error) { shoppingResults.replaceChildren();searchMessage.textContent = error.message; }
+      finally { button.disabled = false;button.textContent='Find deals';shoppingResults.setAttribute('aria-busy','false'); }
     });
 </script>
 
@@ -289,6 +301,8 @@ function renderSelectedOffers() {
   const box = document.getElementById('selected-offers');
   const panel=document.getElementById('comparison-panel');
   panel.hidden=selectedOffers.size===0;
+  document.getElementById('selected-count').textContent=selectedOffers.size;
+  document.querySelectorAll('input[data-offer-key]').forEach(input=>input.closest('li').classList.toggle('offer-selected',input.checked));
   document.body.style.paddingBottom=panel.hidden ? '' : (panel.getBoundingClientRect().height+20)+'px';
   box.replaceChildren();
   if (!selectedOffers.size) {
@@ -340,6 +354,14 @@ new ResizeObserver(() => {
   const panel=document.getElementById('comparison-panel');
   document.body.style.paddingBottom=panel.hidden ? '' : (panel.getBoundingClientRect().height+20)+'px';
 }).observe(document.getElementById('comparison-panel'));
+</script><button id="back-top" type="button" hidden aria-label="Back to top">↑ Top</button><script>
+const backTop=document.getElementById('back-top');
+function updateBackTop(){backTop.hidden=window.scrollY<400;const panel=document.getElementById('comparison-panel');backTop.style.bottom=(panel.hidden ? 18 : panel.getBoundingClientRect().height+12)+'px';}
+window.addEventListener('scroll',updateBackTop,{passive:true});
+window.addEventListener('resize',updateBackTop);
+new ResizeObserver(updateBackTop).observe(document.getElementById('comparison-panel'));
+backTop.addEventListener('click',()=>window.scrollTo({top:0,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}));
+updateBackTop();
 </script></body></html>
 
 
