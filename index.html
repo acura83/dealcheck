@@ -16,10 +16,10 @@ h1{font-size:34px;margin:8px 0}.intro{margin:8px 0;max-width:800px}
 .layout{grid-template-columns:minmax(280px,360px) minmax(0,1fr)}
 .results-panel .results{border-top:0;margin-top:0;padding-top:0}
 select{width:100%;padding:10px;border:1px solid #d7dfe8;border-radius:9px;background:#fff;font:inherit}
-#comparison-panel{position:fixed;bottom:0;left:0;right:0;z-index:100;background:#fff;border-radius:18px 18px 0 0;box-shadow:0 -8px 32px #17273b24;height:18vh;max-height:18vh;overflow:auto;padding:8px 18px;border-top:2px solid #187c69}
+#comparison-panel{position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;flex-direction:column;background:transparent;border:0;border-radius:0;box-shadow:none;height:18vh;max-height:18vh;overflow:visible;padding:0 18px}
 #comparison-panel[hidden]{display:none}
-.comparison-heading{display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:sticky;top:-8px;z-index:2;background:#fff;padding:8px 0;border-bottom:1px solid #e2e8ef}#comparison-panel h2{margin:0;font-size:17px}
-#comparison-panel>p.hint{margin:6px 0;font-size:12px}
+.comparison-heading{display:flex;align-items:center;gap:14px;flex-wrap:wrap;flex-shrink:0;align-self:flex-start;background:#edf7f2;border:1px solid #b8d8cb;border-bottom:0;border-radius:16px 20px 0 0;padding:8px 18px;position:relative;z-index:2;box-shadow:0 -4px 14px #17273b10;max-width:100%}#comparison-panel h2{margin:0;font-size:17px}
+.comparison-body{background:#fff;border:1px solid #b8d8cb;border-top:2px solid #187c69;border-radius:0 14px 0 0;box-shadow:0 -6px 24px #17273b14;padding:8px 14px;overflow:auto;flex:1;min-height:0}.comparison-body>p.hint{margin:6px 0;font-size:12px}
 #comparison-panel #clear-selection{padding:8px 12px;font-size:13px}
 #selected-offers{display:flex;gap:10px;overflow-x:auto;margin-top:8px!important;padding-bottom:4px}
 #selected-offers>article{flex:0 0 250px;margin:0!important;padding:9px!important}
@@ -27,7 +27,7 @@ select{width:100%;padding:10px;border:1px solid #d7dfe8;border-radius:9px;backgr
 #selected-offers h3{margin:0 0 4px;font-size:13px}
 #selection-status{margin:6px 0;font-size:13px}
 #selected-offers button{padding:6px 10px;font-size:12px;margin-top:6px!important}#selected-offers a{font-size:12px;margin-top:6px!important}
-@media(max-width:950px){.layout{grid-template-columns:1fr}#comparison-panel{padding:8px 10px;height:18vh;max-height:18vh}}
+@media(max-width:950px){.layout{grid-template-columns:1fr}#comparison-panel{padding:0 10px;height:18vh;max-height:18vh}.comparison-heading{gap:8px;padding:6px 10px}#comparison-panel h2{font-size:14px}#comparison-panel #clear-selection{font-size:12px;padding:6px 8px}}
 </style></head><body>
 <header><nav><div class="brand">Deal<span>Check</span></div><span class="badge">Shop smarter</span></nav></header>
 <main><div class="eyebrow">MAKE EVERY DOLLAR COUNT</div><h1>Good deals. Clear decisions.</h1><p class="intro">Explore product offers and compare discounts with simple numbers, so you can choose with confidence.</p>
@@ -40,9 +40,9 @@ select{width:100%;padding:10px;border:1px solid #d7dfe8;border-radius:9px;backgr
 
 <section id="comparison-panel" class="card" aria-labelledby="true-cost-heading" hidden>
 <div class="comparison-heading"><h2 id="true-cost-heading">Compare the true cost</h2><button id="clear-selection" type="button" style="background:#eef3f0;color:#187c69">Clear selected items</button></div>
-<div id="selected-offers" style="margin-top:20px"></div>
+<div class="comparison-body"><div id="selected-offers" style="margin-top:20px"></div>
 <p id="selection-status" role="status" aria-live="polite"></p>
-<p class="hint">Listed prices already include any advertised markdown; savings are not deducted again. Totals exclude shipping, tax, and other fees. Compare equivalent products and sizes.</p></section>
+<p class="hint">Listed prices already include any advertised markdown; savings are not deducted again. Totals exclude shipping, tax, and other fees. Compare equivalent products and sizes.</p></div></section>
 <footer>DealCheck · Thoughtful shopping starts with a clear comparison.</footer></main>
 <script>
     // Match words against titles, deduplicate offers, and sort known prices first.
