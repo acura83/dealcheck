@@ -16,24 +16,25 @@ h1{font-size:34px;margin:8px 0}.intro{margin:8px 0;max-width:800px}
 .layout{grid-template-columns:minmax(280px,360px) minmax(0,1fr)}
 .results-panel .results{border-top:0;margin-top:0;padding-top:0}
 select{width:100%;padding:10px;border:1px solid #d7dfe8;border-radius:9px;background:#fff;font:inherit}
-#comparison-panel{position:fixed;bottom:0;left:0;right:0;z-index:100;background:#fff;border-radius:18px 18px 0 0;box-shadow:0 -8px 32px #17273b24;max-height:42vh;overflow:auto;padding:16px 24px;border-top:2px solid #187c69}
+#comparison-panel{position:fixed;bottom:0;left:0;right:0;z-index:100;background:#fff;border-radius:18px 18px 0 0;box-shadow:0 -8px 32px #17273b24;max-height:32vh;overflow:auto;padding:10px 18px;border-top:2px solid #187c69}
 #comparison-panel[hidden]{display:none}
-#comparison-panel h2{display:inline-block;margin-right:18px}
+#comparison-panel h2{display:inline-block;margin-right:14px;font-size:17px}
 #comparison-panel>p.hint{margin:6px 0;font-size:12px}
 #comparison-panel #clear-selection{padding:8px 12px;font-size:13px}
-#selected-offers{display:flex;gap:12px;overflow-x:auto;margin-top:12px!important;padding-bottom:6px}
-#selected-offers>article{flex:0 0 290px;margin:0!important;padding:12px!important}
-#selected-offers p{margin:6px 0;font-size:13px}
-#selected-offers h3{margin:0 0 6px;font-size:14px}
+#selected-offers{display:flex;gap:10px;overflow-x:auto;margin-top:8px!important;padding-bottom:4px}
+#selected-offers>article{flex:0 0 250px;margin:0!important;padding:9px!important}
+#selected-offers p{margin:4px 0;font-size:12px}
+#selected-offers h3{margin:0 0 4px;font-size:13px}
 #selection-status{margin:6px 0;font-size:13px}
-@media(max-width:950px){.layout{grid-template-columns:1fr}#comparison-panel{padding:12px;max-height:45vh}}
+#selected-offers button{padding:6px 10px;font-size:12px;margin-top:6px!important}#selected-offers a{font-size:12px;margin-top:6px!important}
+@media(max-width:950px){.layout{grid-template-columns:1fr}#comparison-panel{padding:10px;max-height:35vh}}
 </style></head><body>
 <header><nav><div class="brand">Deal<span>Check</span></div><span class="badge">Shop smarter</span></nav></header>
 <main><div class="eyebrow">MAKE EVERY DOLLAR COUNT</div><h1>Good deals. Clear decisions.</h1><p class="intro">Explore product offers and compare discounts with simple numbers, so you can choose with confidence.</p>
 <div class="layout"><section class="card"><h2>Find product deals</h2><p class="hint">Search by item, brand, or exact model.</p><form id="search-form" role="search"><label for="page-search">What are you shopping for?</label><div class="search-row"><input id="page-search" name="q" type="search" required maxlength="200" placeholder="e.g. Got2b Glued Spray 2 oz"><button type="submit">Find deals</button></div><label style="display:flex;align-items:center;gap:8px;font-weight:400"><input id="match-terms" type="checkbox" style="width:auto"> Exact title matching (optional)</label><label for="search-sort">Sort offers by</label><select id="search-sort"><option value="price">Lowest listed price</option><option value="relevance">Most relevant</option><option value="matchprice">Closest matches, then lowest price</option><option value="price-desc">Highest listed price</option><option value="unit">Lowest price per unit</option></select>
-<label style="display:flex;align-items:center;gap:8px;font-weight:400"><input id="hide-extreme-prices" type="checkbox" checked style="width:auto"> Hide extreme prices</label><p class="hint">With at least 5 known prices, hide offers below one-fifth or above five times the median price. Different sizes and bulk packs may be hidden too; turn this off to see every offer. This does not verify seller reliability.</p><p class="hint">Includes Walmart, Target, Amazon, Home Depot, Lowe’s, Staples, Office Depot, Best Buy, Costco, and more. Marketplace offers may come from third-party sellers. Only stores returned by the shopping search can appear.</p>
+<label style="display:flex;align-items:center;gap:8px;font-weight:400"><input id="hide-extreme-prices" type="checkbox" checked style="width:auto"> Hide extreme prices</label>
 <label for="search-unit">Unit for size comparison</label><select id="search-unit"><option value="oz">Ounce (weight)</option><option value="floz">Fluid ounce (volume)</option><option value="g">Gram</option><option value="ml">Milliliter</option><option value="item">Item / count</option></select>
-<p class="hint">For unit-price searches, enter brand and product without a size to compare different packages. Sizes are read from titles; verify them with the retailer. Multipacks and unclear sizes are not ranked by unit price.</p><p class="hint">Change sorting after searching—no new search needed. Closest matching checks whole title words and prioritizes model and size terms. For closer matches, include brand, model, size, and quantity. Broad searches show related offers; use exact title matching to narrow them. Shipping and taxes are not included.</p></form></section>
+</form></section>
 <section class="card results-panel"><section class="results" id="results-box" aria-labelledby="results-heading"><h2 id="results-heading">Shopping results</h2><p id="search-message" role="status" aria-live="polite"></p><div id="shopping-results"></div></section><div class="note"><small>Lowest listed price among matching returned offers—not every store. Title matching cannot verify product equivalence. Check product size, shipping, and availability with the retailer.</small></div></section>
 </div>
 
