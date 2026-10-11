@@ -33,6 +33,28 @@ select{width:100%;padding:10px;border:1px solid #d7dfe8;border-radius:9px;backgr
 #shopping-results li{min-width:0;margin:0!important;overflow-wrap:anywhere}
 #shopping-results li[hidden]{display:none}
 @media(max-width:650px){#shopping-results ol{grid-template-columns:1fr}}
+
+@media(max-width:650px){
+  body{overflow-x:hidden}
+  main{padding:18px 12px}
+  nav{padding:14px 12px;gap:10px}
+  .brand{font-size:21px}.badge{font-size:11px;padding:6px 9px}
+  h1{font-size:28px;letter-spacing:-1px}.intro{font-size:14px}
+  .layout{grid-template-columns:minmax(0,1fr);gap:14px;margin-top:18px}
+  .card{padding:16px;min-width:0}
+  input,select{font-size:16px;min-height:44px}
+  .search-row{flex-direction:column}.search-row button{width:100%;min-height:44px}
+  #shopping-results ol{grid-template-columns:minmax(0,1fr);gap:12px}
+  #shopping-results a{display:inline-block;padding:10px 0;min-height:44px}
+  #comparison-panel{padding:0 6px;height:18dvh;max-height:18dvh}
+  .comparison-heading{gap:8px;padding:5px 8px;flex-wrap:nowrap;width:100%;border-radius:12px 12px 0 0}
+  #comparison-panel h2{font-size:13px;flex:1;min-width:0}
+  #comparison-panel #clear-selection{font-size:11px;padding:6px 8px;min-height:36px;white-space:nowrap}
+  .comparison-body{padding:6px 8px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+  #selected-offers{gap:8px;overscroll-behavior-x:contain}
+  #selected-offers>article{flex-basis:min(250px,80vw)}
+  #selected-offers button,#selected-offers a{min-height:36px;display:inline-flex;align-items:center}
+}
 </style></head><body>
 <header><nav><div class="brand">Deal<span>Check</span></div><span class="badge">Shop smarter</span></nav></header>
 <main><div class="eyebrow">MAKE EVERY DOLLAR COUNT</div><h1>Good deals. Clear decisions.</h1><p class="intro">Explore product offers and compare discounts with simple numbers, so you can choose with confidence.</p>
