@@ -12,21 +12,39 @@ h1{font-size:34px;margin:8px 0}.intro{margin:8px 0;max-width:800px}
 #shopping-results:empty:before{padding:35px 12px}.note{margin-top:16px;padding-top:12px}footer{margin-top:18px}
 @media(max-width:950px){.layout{grid-template-columns:1fr}.two{grid-template-columns:1fr 1fr}}
 @media(max-width:520px){main{padding:20px 12px}nav{padding:16px 12px}.card{padding:16px}.two{grid-template-columns:1fr}h1{font-size:28px}}
+
+.layout{grid-template-columns:minmax(280px,360px) minmax(0,1fr)}
+.results-panel .results{border-top:0;margin-top:0;padding-top:0}
+select{width:100%;padding:10px;border:1px solid #d7dfe8;border-radius:9px;background:#fff;font:inherit}
+#comparison-panel{position:fixed;bottom:0;left:0;right:0;z-index:100;background:#fff;border-radius:18px 18px 0 0;box-shadow:0 -8px 32px #17273b24;max-height:42vh;overflow:auto;padding:16px 24px;border-top:2px solid #187c69}
+#comparison-panel[hidden]{display:none}
+#comparison-panel h2{display:inline-block;margin-right:18px}
+#comparison-panel>p.hint{margin:6px 0;font-size:12px}
+#comparison-panel #clear-selection{padding:8px 12px;font-size:13px}
+#selected-offers{display:flex;gap:12px;overflow-x:auto;margin-top:12px!important;padding-bottom:6px}
+#selected-offers>article{flex:0 0 290px;margin:0!important;padding:12px!important}
+#selected-offers p{margin:6px 0;font-size:13px}
+#selected-offers h3{margin:0 0 6px;font-size:14px}
+#selection-status{margin:6px 0;font-size:13px}
+@media(max-width:950px){.layout{grid-template-columns:1fr}#comparison-panel{padding:12px;max-height:45vh}}
 </style></head><body>
 <header><nav><div class="brand">Deal<span>Check</span></div><span class="badge">Shop smarter</span></nav></header>
 <main><div class="eyebrow">MAKE EVERY DOLLAR COUNT</div><h1>Good deals. Clear decisions.</h1><p class="intro">Explore product offers and compare discounts with simple numbers, so you can choose with confidence.</p>
 <div class="layout"><section class="card"><h2>Find product deals</h2><p class="hint">Search by item, brand, or exact model.</p><form id="search-form" role="search"><label for="page-search">What are you shopping for?</label><div class="search-row"><input id="page-search" name="q" type="search" required maxlength="200" placeholder="e.g. Got2b Glued Spray 2 oz"><button type="submit">Find deals</button></div><label style="display:flex;align-items:center;gap:8px;font-weight:400"><input id="match-terms" type="checkbox" style="width:auto"> Exact title matching (optional)</label><label for="search-sort">Sort offers by</label><select id="search-sort"><option value="price">Lowest listed price</option><option value="relevance">Most relevant</option><option value="matchprice">Closest matches, then lowest price</option><option value="price-desc">Highest listed price</option><option value="unit">Lowest price per unit</option></select>
-<label for="retailer-filter">Stores to show</label><select id="retailer-filter"><option value="all">All stores</option><option value="major">Major retailers</option></select><p class="hint">Includes Walmart, Target, Amazon, Home Depot, Lowe’s, Staples, Office Depot, Best Buy, Costco, and more. Marketplace offers may come from third-party sellers. Only stores returned by the shopping search can appear.</p>
+<label style="display:flex;align-items:center;gap:8px;font-weight:400"><input id="hide-extreme-prices" type="checkbox" checked style="width:auto"> Hide extreme prices</label><p class="hint">With at least 5 known prices, hide offers below one-fifth or above five times the median price. Different sizes and bulk packs may be hidden too; turn this off to see every offer. This does not verify seller reliability.</p><p class="hint">Includes Walmart, Target, Amazon, Home Depot, Lowe’s, Staples, Office Depot, Best Buy, Costco, and more. Marketplace offers may come from third-party sellers. Only stores returned by the shopping search can appear.</p>
 <label for="search-unit">Unit for size comparison</label><select id="search-unit"><option value="oz">Ounce (weight)</option><option value="floz">Fluid ounce (volume)</option><option value="g">Gram</option><option value="ml">Milliliter</option><option value="item">Item / count</option></select>
-<p class="hint">For unit-price searches, enter brand and product without a size to compare different packages. Sizes are read from titles; verify them with the retailer. Multipacks and unclear sizes are not ranked by unit price.</p><p class="hint">Change sorting after searching—no new search needed. Closest matching checks whole title words and prioritizes model and size terms. For closer matches, include brand, model, size, and quantity. Broad searches show related offers; use exact title matching to narrow them. Shipping and taxes are not included.</p></form><section class="results" id="results-box" aria-labelledby="results-heading"><h2 id="results-heading">Shopping results</h2><p id="search-message" role="status" aria-live="polite"></p><div id="shopping-results"></div></section><div class="note"><small>Lowest listed price among matching returned offers—not every store. Title matching cannot verify product equivalence. Check product size, shipping, and availability with the retailer.</small></div></section>
-<section class="card" aria-labelledby="true-cost-heading">
+<p class="hint">For unit-price searches, enter brand and product without a size to compare different packages. Sizes are read from titles; verify them with the retailer. Multipacks and unclear sizes are not ranked by unit price.</p><p class="hint">Change sorting after searching—no new search needed. Closest matching checks whole title words and prioritizes model and size terms. For closer matches, include brand, model, size, and quantity. Broad searches show related offers; use exact title matching to narrow them. Shipping and taxes are not included.</p></form></section>
+<section class="card results-panel"><section class="results" id="results-box" aria-labelledby="results-heading"><h2 id="results-heading">Shopping results</h2><p id="search-message" role="status" aria-live="polite"></p><div id="shopping-results"></div></section><div class="note"><small>Lowest listed price among matching returned offers—not every store. Title matching cannot verify product equivalence. Check product size, shipping, and availability with the retailer.</small></div></section>
+</div>
+
+<section id="comparison-panel" class="card" aria-labelledby="true-cost-heading" hidden>
 <h2 id="true-cost-heading">Compare the true cost</h2>
 <p class="hint">Check items in shopping results to compare their listed product prices side by side.</p>
 <button id="clear-selection" type="button" style="background:#eef3f0;color:#187c69">Clear selected items</button>
 <div id="selected-offers" style="margin-top:20px"></div>
 <p id="selection-status" role="status" aria-live="polite"></p>
 <p class="hint">Listed prices already include any advertised markdown; savings are not deducted again. Totals exclude shipping, tax, and other fees. Compare equivalent products and sizes.</p></section>
-</div><footer>DealCheck · Thoughtful shopping starts with a clear comparison.</footer></main>
+<footer>DealCheck · Thoughtful shopping starts with a clear comparison.</footer></main>
 <script>
     // Match words against titles, deduplicate offers, and sort known prices first.
     function getUnitQuantity(title, unit) {
@@ -52,6 +70,17 @@ h1{font-size:34px;margin:8px 0}.intro{margin:8px 0;max-width:800px}
       if (Number.isFinite(item.numericPrice) && item.numericPrice >= 0) return item.numericPrice;
       const match = String(item.price || '').trim().match(/^(?:US\s*)?\$\s*(\d+(?:,\d{3})*(?:\.\d{1,2})?)$/);
       return match ? Number(match[1].replace(/,/g, '')) : null;
+    }
+    function filterExtremePrices(offers, enabled) {
+      const prices=offers.map(readListedPrice).filter(price => Number.isFinite(price) && price > 0).sort((a,b)=>a-b);
+      if (!enabled || prices.length < 5) return {offers, hidden:0, median:null};
+      const middle=Math.floor(prices.length/2);
+      const median=prices.length % 2 ? prices[middle] : (prices[middle-1]+prices[middle])/2;
+      const kept=offers.filter(item => {
+        const price=readListedPrice(item);
+        return price === null || (price >= median/5 && price <= median*5);
+      });
+      return {offers:kept, hidden:offers.length-kept.length, median};
     }
     // Match complete retailer names, including domain names and marketplace labels.
     function isMajorRetailer(store) {
@@ -97,10 +126,13 @@ h1{font-size:34px;margin:8px 0}.intro{margin:8px 0;max-width:800px}
       shoppingResults.replaceChildren();
                 const sortMode = document.getElementById('search-sort').value;
         const searchUnit = document.getElementById('search-unit').value;
-        const majorOnly = document.getElementById('retailer-filter').value === 'major';
+        const majorOnly = false;
         const offers = majorOnly ? data.results.filter(item => isMajorRetailer(item.store)) : data.results;
-        const ranked = rankOffers(offers, query, document.getElementById('match-terms').checked, sortMode, searchUnit);
-        searchMessage.textContent = ranked.length ? 'Showing ' + ranked.length + (majorOnly ? ' major-retailer offers, ' : ' matching offers, ') + (sortMode === 'majorprice' ? 'major retailers first, lowest to highest price within each group' : sortMode === 'unit' ? 'known unit prices first; unverified sizes last' : sortMode === 'relevance' ? 'closest title matches first; model and size terms receive extra weight' : sortMode === 'matchprice' ? 'all search terms matched first, then lowest price' : sortMode === 'price-desc' ? 'highest listed price first' : 'lowest listed price first') + ' · Retrieved ' + new Date(data.searchedAt).toLocaleString() : majorOnly ? 'No matching major-retailer offers were returned. Switch Stores to show to All stores, or try a different search.' : 'No matching offers. Try different words or turn off title matching and search again.';
+        const sorted = rankOffers(offers, query, document.getElementById('match-terms').checked, sortMode, searchUnit);
+        const filtered = filterExtremePrices(sorted, document.getElementById('hide-extreme-prices').checked);
+        const ranked = filtered.offers;
+        searchMessage.textContent = ranked.length ? 'Showing ' + ranked.length + (majorOnly ? ' major-retailer offers, ' : ' matching offers, ') + (sortMode === 'majorprice' ? 'major retailers first, lowest to highest price within each group' : sortMode === 'unit' ? 'known unit prices first; unverified sizes last' : sortMode === 'relevance' ? 'closest title matches first; model and size terms receive extra weight' : sortMode === 'matchprice' ? 'all search terms matched first, then lowest price' : sortMode === 'price-desc' ? 'highest listed price first' : 'lowest listed price first') + ' · Retrieved ' + new Date(data.searchedAt).toLocaleString() : majorOnly ? 'No matching major-retailer offers were returned. Try a different search.' : 'No matching offers. Try different words or turn off title matching and search again.';
+        if (filtered.hidden) searchMessage.textContent += ' · ' + filtered.hidden + ' extreme-price offers hidden (median USD ' + filtered.median.toFixed(2) + '). Turn off Hide extreme prices to view them.';
         const list = document.createElement('ol');
         ranked.forEach((item, index) => {
           const card = document.createElement('li');
@@ -175,7 +207,7 @@ h1{font-size:34px;margin:8px 0}.intro{margin:8px 0;max-width:800px}
         }
 
     }
-    ['search-sort','search-unit','match-terms','retailer-filter'].forEach(id => document.getElementById(id).addEventListener('change', () => {
+    ['search-sort','search-unit','match-terms','hide-extreme-prices'].forEach(id => document.getElementById(id).addEventListener('change', () => {
       if (lastSearch) renderSearchResults(lastSearch.data, lastSearch.query);
     }));
     document.getElementById('search-form').addEventListener('submit', async event => {
@@ -216,6 +248,9 @@ function offerCosts(item) {
 const cash = cents => cents === null ? 'Unknown' : '$'+(cents/100).toFixed(2);
 function renderSelectedOffers() {
   const box = document.getElementById('selected-offers');
+  const panel=document.getElementById('comparison-panel');
+  panel.hidden=selectedOffers.size===0;
+  document.body.style.paddingBottom=panel.hidden ? '' : (panel.getBoundingClientRect().height+20)+'px';
   box.replaceChildren();
   if (!selectedOffers.size) {
     const empty = document.createElement('p');empty.className='hint';empty.textContent='No items selected. Check “Compare this item” in the shopping results.';box.append(empty);
@@ -261,6 +296,10 @@ function syncSelectionBoxes() {
 }
 document.getElementById('clear-selection').addEventListener('click',()=>{selectedOffers.clear();syncSelectionBoxes();renderSelectedOffers();});
 renderSelectedOffers();
+new ResizeObserver(() => {
+  const panel=document.getElementById('comparison-panel');
+  document.body.style.paddingBottom=panel.hidden ? '' : (panel.getBoundingClientRect().height+20)+'px';
+}).observe(document.getElementById('comparison-panel'));
 </script></body></html>
 
 
