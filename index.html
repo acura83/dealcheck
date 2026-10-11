@@ -15,9 +15,9 @@ h1{font-size:34px;margin:8px 0}.intro{margin:8px 0;max-width:800px}
 </style></head><body>
 <header><nav><div class="brand">Deal<span>Check</span></div><span class="badge">Shop smarter</span></nav></header>
 <main><div class="eyebrow">MAKE EVERY DOLLAR COUNT</div><h1>Good deals. Clear decisions.</h1><p class="intro">Explore product offers and compare discounts with simple numbers, so you can choose with confidence.</p>
-<div class="layout"><section class="card"><h2>Find product deals</h2><p class="hint">Search by item, brand, or exact model.</p><form id="search-form" role="search"><label for="page-search">What are you shopping for?</label><div class="search-row"><input id="page-search" name="q" type="search" required maxlength="200" placeholder="e.g. Got2b Glued Spray 2 oz"><button type="submit">Find deals</button></div><label style="display:flex;align-items:center;gap:8px;font-weight:400"><input id="match-terms" type="checkbox" style="width:auto"> Exact title matching (optional)</label><label for="search-sort">Sort offers by</label><select id="search-sort"><option value="relevance">Most relevant</option><option value="price">Lowest listed price</option><option value="unit">Lowest price per unit</option></select>
+<div class="layout"><section class="card"><h2>Find product deals</h2><p class="hint">Search by item, brand, or exact model.</p><form id="search-form" role="search"><label for="page-search">What are you shopping for?</label><div class="search-row"><input id="page-search" name="q" type="search" required maxlength="200" placeholder="e.g. Got2b Glued Spray 2 oz"><button type="submit">Find deals</button></div><label style="display:flex;align-items:center;gap:8px;font-weight:400"><input id="match-terms" type="checkbox" style="width:auto"> Exact title matching (optional)</label><label for="search-sort">Sort offers by</label><select id="search-sort"><option value="relevance">Most relevant</option><option value="matchprice">Closest matches, then lowest price</option><option value="price">Lowest listed price</option><option value="price-desc">Highest listed price</option><option value="unit">Lowest price per unit</option></select>
 <label for="search-unit">Unit for size comparison</label><select id="search-unit"><option value="oz">Ounce (weight)</option><option value="floz">Fluid ounce (volume)</option><option value="g">Gram</option><option value="ml">Milliliter</option><option value="item">Item / count</option></select>
-<p class="hint">For unit-price searches, enter brand and product without a size to compare different packages. Sizes are read from titles; verify them with the retailer. Multipacks and unclear sizes are not ranked by unit price.</p><p class="hint">For closer matches, include brand, model, size, and quantity. Broad searches show related offers; use exact title matching to narrow them. Shipping and taxes are not included.</p></form><section class="results" id="results-box" aria-labelledby="results-heading"><h2 id="results-heading">Shopping results</h2><p id="search-message" role="status" aria-live="polite"></p><div id="shopping-results"></div></section><div class="note"><small>Lowest listed price among matching returned offers—not every store. Title matching cannot verify product equivalence. Check product size, shipping, and availability with the retailer.</small></div></section>
+<p class="hint">For unit-price searches, enter brand and product without a size to compare different packages. Sizes are read from titles; verify them with the retailer. Multipacks and unclear sizes are not ranked by unit price.</p><p class="hint">Change sorting after searching—no new search needed. Closest matching checks whole title words and prioritizes model and size terms. For closer matches, include brand, model, size, and quantity. Broad searches show related offers; use exact title matching to narrow them. Shipping and taxes are not included.</p></form><section class="results" id="results-box" aria-labelledby="results-heading"><h2 id="results-heading">Shopping results</h2><p id="search-message" role="status" aria-live="polite"></p><div id="shopping-results"></div></section><div class="note"><small>Lowest listed price among matching returned offers—not every store. Title matching cannot verify product equivalence. Check product size, shipping, and availability with the retailer.</small></div></section>
 <section class="card" aria-labelledby="true-cost-heading">
 <h2 id="true-cost-heading">Compare the true cost</h2>
 <p class="hint">Check items in shopping results to compare their listed product prices side by side.</p>
@@ -53,55 +53,45 @@ h1{font-size:34px;margin:8px 0}.intro{margin:8px 0;max-width:800px}
       return match ? Number(match[1].replace(/,/g, '')) : null;
     }
     function rankOffers(offers, query, strict, sortMode = 'price', unit = 'oz') {
-      const normalize = text => String(text).toLowerCase().replace(/ounces?/g,'oz').replace(/millilit(?:er|re)s?/g,'ml').replace(/grams?/g,'g').replace(/(\d)(oz|ml|g)\b/g,'$1 $2');
+      const normalize = text => String(text || '').toLowerCase().replace(/ounces?/g,'oz').replace(/millilit(?:er|re)s?/g,'ml').replace(/grams?/g,'g').replace(/(\d)(oz|ml|g)\b/g,'$1 $2');
       const words = text => (normalize(text).match(/[a-z0-9]+(?:\.[0-9]+)?/g) || []).map(word => word.length > 3 && word.endsWith('s') && !word.endsWith('ss') ? word.slice(0,-1) : word);
-      const terms = words(query).filter(word => !['the','a','an','for','with','and','of','buy'].includes(word));
-      const matches = (title, term) => words(title).includes(term) || (!/^\d/.test(term) && normalize(title).replace(/[^a-z0-9]/g,'').includes(term));
+      const terms = [...new Set(words(query).filter(word => !['the','a','an','for','with','and','of','buy'].includes(word)))];
+      const matches = (title, term) => words(title).includes(term);
       const seen = new Set();
       return offers.map(item => {
         const quantity = getUnitQuantity(item.title, unit);
         const numericPrice = readListedPrice(item);
-        return {...item, relevance:terms.filter(term => matches(item.title,term)).length, numericPrice, unitQuantity:quantity, unitPrice:quantity && Number.isFinite(numericPrice) ? numericPrice / quantity : null};
+        const matchedTerms = terms.filter(term => matches(item.title,term));
+        const relevance = matchedTerms.reduce((score, term) => score + (/\d/.test(term) ? 3 : 1), 0);
+        const fullMatch = terms.length > 0 && matchedTerms.length === terms.length;
+        return {...item, relevance, fullMatch, matchedCount:matchedTerms.length, termCount:terms.length, numericPrice, unitQuantity:quantity, unitPrice:quantity && Number.isFinite(numericPrice) ? numericPrice / quantity : null};
       }).filter(item => {
-        const titleWords = new Set(words(item.title));
         if (strict && !terms.every(term => matches(item.title,term))) return false;
         const identity = [item.title, item.store, item.price, item.link].join('|');
         if (seen.has(identity)) return false;
         seen.add(identity); return true;
       }).sort((a,b) => {
+        if (['relevance','matchprice'].includes(sortMode) && a.fullMatch !== b.fullMatch) return Number(b.fullMatch)-Number(a.fullMatch);
         if (sortMode === 'relevance' && a.relevance !== b.relevance) return b.relevance-a.relevance;
         const valueA = sortMode === 'unit' ? a.unitPrice : a.numericPrice;
         const priceA = Number.isFinite(valueA) ? valueA : Infinity;
         const valueB = sortMode === 'unit' ? b.unitPrice : b.numericPrice;
         const priceB = Number.isFinite(valueB) ? valueB : Infinity;
-        return priceA - priceB;
+        if (priceA === Infinity || priceB === Infinity) return priceA === priceB ? 0 : priceA === Infinity ? 1 : -1;
+        return sortMode === 'price-desc' ? priceB-priceA : priceA-priceB;
       });
     }
     // The browser asks our server; the private API key stays on the server.
     const searchInput = document.getElementById('page-search');
     const searchMessage = document.getElementById('search-message');
     const shoppingResults = document.getElementById('shopping-results');
-    document.getElementById('search-form').addEventListener('submit', async event => {
-      event.preventDefault();
-      const query = searchInput.value.trim();
-      if (!query) { searchMessage.textContent = 'Enter an item name.'; return; }
-      // Each submitted search starts a fresh comparison.
-      selectedOffers.clear();
-      syncSelectionBoxes();
-      renderSelectedOffers();
-      if (location.protocol === 'file:') { searchMessage.textContent = 'Start the local server and open http://127.0.0.1:3000 to search.'; return; }
-      const button = event.currentTarget.querySelector('button');
-      button.disabled = true;
-      searchMessage.textContent = 'Searching shopping offers…';
+    let lastSearch = null;
+    function renderSearchResults(data, query) {
       shoppingResults.replaceChildren();
-      try {
-        const response = await fetch('/api/search?q=' + encodeURIComponent(query));
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || 'Search failed.');
                 const sortMode = document.getElementById('search-sort').value;
         const searchUnit = document.getElementById('search-unit').value;
         const ranked = rankOffers(data.results, query, document.getElementById('match-terms').checked, sortMode, searchUnit);
-        searchMessage.textContent = ranked.length ? 'Showing ' + ranked.length + ' matching offers, ' + (sortMode === 'unit' ? 'known unit prices first; unverified sizes last' : sortMode === 'relevance' ? 'most relevant first' : 'lowest listed price first') + ' · Retrieved ' + new Date(data.searchedAt).toLocaleString() : 'No matching offers. Try different words or turn off title matching and search again.';
+        searchMessage.textContent = ranked.length ? 'Showing ' + ranked.length + ' matching offers, ' + (sortMode === 'unit' ? 'known unit prices first; unverified sizes last' : sortMode === 'relevance' ? 'closest title matches first; model and size terms receive extra weight' : sortMode === 'matchprice' ? 'all search terms matched first, then lowest price' : sortMode === 'price-desc' ? 'highest listed price first' : 'lowest listed price first') + ' · Retrieved ' + new Date(data.searchedAt).toLocaleString() : 'No matching offers. Try different words or turn off title matching and search again.';
         const list = document.createElement('ol');
         ranked.forEach((item, index) => {
           const card = document.createElement('li');
@@ -116,6 +106,10 @@ h1{font-size:34px;margin:8px 0}.intro{margin:8px 0;max-width:800px}
           const title = document.createElement('p'); title.textContent = item.title;
           const info = document.createElement('p'); info.textContent = item.price + ' — ' + item.store;
           card.append(title, info);
+          const matchInfo = document.createElement('p');
+          matchInfo.className = 'hint';
+          matchInfo.textContent = item.fullMatch ? 'All search terms found in title' : item.matchedCount + ' of ' + item.termCount + ' search terms found in title';
+          card.append(matchInfo);
           const markdown = offerCosts(item, null).savings;
           if (markdown !== null && markdown > 0) {
             const saving = document.createElement('p');
@@ -142,7 +136,7 @@ h1{font-size:34px;margin:8px 0}.intro{margin:8px 0;max-width:800px}
             unitInfo.textContent = Number.isFinite(item.unitPrice) ? '$' + item.unitPrice.toFixed(4) + ' per ' + searchUnit + ' · Size read from title: ' + item.unitQuantity + ' ' + searchUnit : 'Unit price unavailable: size or price needs verification.';
             card.append(unitInfo);
           }
-          if (sortMode !== 'relevance' && index === 0 && Number.isFinite(sortMode === 'unit' ? item.unitPrice : item.numericPrice)) {
+          if (['price','unit'].includes(sortMode) && index === 0 && Number.isFinite(sortMode === 'unit' ? item.unitPrice : item.numericPrice)) {
             const badge = document.createElement('strong');
             badge.textContent = sortMode === 'unit' ? 'Lowest known unit price in these results' : 'Lowest listed price in these results';
             badge.style.color = '#187c69';
@@ -164,6 +158,31 @@ h1{font-size:34px;margin:8px 0}.intro{margin:8px 0;max-width:800px}
           });
           shoppingResults.append(more);
         }
+
+    }
+    ['search-sort','search-unit','match-terms'].forEach(id => document.getElementById(id).addEventListener('change', () => {
+      if (lastSearch) renderSearchResults(lastSearch.data, lastSearch.query);
+    }));
+    document.getElementById('search-form').addEventListener('submit', async event => {
+      event.preventDefault();
+      const query = searchInput.value.trim();
+      if (!query) { searchMessage.textContent = 'Enter an item name.'; return; }
+      lastSearch = null;
+      // Each submitted search starts a fresh comparison.
+      selectedOffers.clear();
+      syncSelectionBoxes();
+      renderSelectedOffers();
+      if (location.protocol === 'file:') { searchMessage.textContent = 'Start the local server and open http://127.0.0.1:3000 to search.'; return; }
+      const button = event.currentTarget.querySelector('button');
+      button.disabled = true;
+      searchMessage.textContent = 'Searching shopping offers…';
+      shoppingResults.replaceChildren();
+      try {
+        const response = await fetch('/api/search?q=' + encodeURIComponent(query));
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Search failed.');
+        lastSearch = {data, query};
+        renderSearchResults(data, query);
       } catch (error) { searchMessage.textContent = error.message; }
       finally { button.disabled = false; }
     });
