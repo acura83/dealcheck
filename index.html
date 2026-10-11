@@ -79,10 +79,11 @@ button,a,input,select{transition:background-color .18s,border-color .18s,box-sha
 #back-top[hidden]{display:none}
 @media(max-width:650px){.loading-grid{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+#recent-searches{margin-top:14px}.recent-heading{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#667588;margin-bottom:6px}#clear-history{background:transparent;color:#187c69;font-size:12px;padding:6px;text-decoration:underline}#recent-search-chips{display:flex;gap:6px;flex-wrap:wrap}.search-chip{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:#edf7f2;color:#187c69;border:1px solid #c8dfd5;font-size:12px;padding:7px 10px}.search-chip:hover{background:#dceee5}
 </style></head><body>
 <header><nav><div class="brand">Deal<span>Check</span></div><span class="badge">Shop smarter</span></nav></header>
 <main><div class="eyebrow">MAKE EVERY DOLLAR COUNT</div><h1>Good deals. Clear decisions.</h1><p class="intro">Explore product offers and compare discounts with simple numbers, so you can choose with confidence.</p>
-<div class="layout"><section class="card"><h2>Find product deals</h2><p class="hint">Search by item, brand, or exact model.</p><form id="search-form" role="search"><label for="page-search">What are you shopping for?</label><div class="search-row"><input id="page-search" name="q" type="search" required maxlength="200" placeholder="e.g. Got2b Glued Spray 2 oz"><button type="submit">Find deals</button></div><label style="display:flex;align-items:center;gap:8px;font-weight:400"><input id="match-terms" type="checkbox" style="width:auto"> Exact title matching (optional)</label><label for="search-sort">Sort offers by</label><select id="search-sort"><option value="price">Lowest listed price</option><option value="relevance">Most relevant</option><option value="matchprice">Closest matches, then lowest price</option><option value="price-desc">Highest listed price</option><option value="unit">Lowest price per unit</option></select>
+<div class="layout"><section class="card"><h2>Find product deals</h2><p class="hint">Search by item, brand, or exact model.</p><form id="search-form" role="search"><label for="page-search">What are you shopping for?</label><div class="search-row"><input id="page-search" name="q" list="search-suggestions" type="search" required maxlength="200" placeholder="e.g. Got2b Glued Spray 2 oz"><button type="submit">Find deals</button></div><datalist id="search-suggestions"></datalist><div id="recent-searches" hidden><div class="recent-heading"><span>Recent searches</span><button id="clear-history" type="button">Clear history</button></div><div id="recent-search-chips"></div></div><label style="display:flex;align-items:center;gap:8px;font-weight:400"><input id="match-terms" type="checkbox" style="width:auto"> Exact title matching (optional)</label><label for="search-sort">Sort offers by</label><select id="search-sort"><option value="price">Lowest listed price</option><option value="relevance">Most relevant</option><option value="matchprice">Closest matches, then lowest price</option><option value="price-desc">Highest listed price</option><option value="unit">Lowest price per unit</option></select>
 
 <label for="search-unit" hidden>Unit for size comparison</label><select id="search-unit" hidden><option value="oz">Ounce (weight)</option><option value="floz">Fluid ounce (volume)</option><option value="g">Gram</option><option value="ml">Milliliter</option><option value="item">Item / count</option></select>
 </form></section>
@@ -172,6 +173,43 @@ button,a,input,select{transition:background-color .18s,border-color .18s,box-sha
     const searchMessage = document.getElementById('search-message');
     const shoppingResults = document.getElementById('shopping-results');
     let lastSearch = null;
+    let recentSearches=[];
+    try {
+      const saved=JSON.parse(localStorage.getItem('dealcheck-recent-searches') || '[]');
+      if(Array.isArray(saved)) recentSearches=saved.filter(q=>typeof q==='string' && q.length<=200).slice(0,6);
+    } catch {}
+    function renderRecentSearches(){
+      const container=document.getElementById('recent-search-chips');container.replaceChildren();
+      document.getElementById('recent-searches').hidden=!recentSearches.length;
+      const suggestions=document.getElementById('search-suggestions');suggestions.replaceChildren();
+      for(const query of recentSearches){
+        const chip=document.createElement('button');chip.type='button';chip.className='search-chip';chip.textContent=query;
+        chip.addEventListener('click',()=>{
+          if(document.querySelector('#search-form button[type="submit"]').disabled)return;
+          searchInput.value=query;document.getElementById('search-form').requestSubmit();
+        });container.append(chip);
+        const option=document.createElement('option');option.value=query;suggestions.append(option);
+      }
+      if(!recentSearches.length){
+        for(const query of ['Got2b Glued Spray 2 oz','CeraVe moisturizing cream','AA batteries 24 pack']){
+          const option=document.createElement('option');option.value=query;suggestions.append(option);
+        }
+      }
+    }
+    function saveRecentSearch(query){
+      recentSearches=[query,...recentSearches.filter(q=>q.toLowerCase()!==query.toLowerCase())].slice(0,6);
+      try{localStorage.setItem('dealcheck-recent-searches',JSON.stringify(recentSearches));}catch{}
+      renderRecentSearches();
+    }
+    document.getElementById('clear-history').addEventListener('click',()=>{
+      recentSearches=[];try{localStorage.removeItem('dealcheck-recent-searches');}catch{}renderRecentSearches();
+    });
+    document.addEventListener('keydown',event=>{
+      if(event.key==='/' && !event.ctrlKey && !event.metaKey && !event.altKey && !event.target.closest('input,textarea,select,[contenteditable]')){
+        event.preventDefault();searchInput.focus();
+      }
+    });
+    renderRecentSearches();
     function renderSearchResults(data, query) {
       shoppingResults.replaceChildren();
                 const sortMode = document.getElementById('search-sort').value;
@@ -279,6 +317,7 @@ button,a,input,select{transition:background-color .18s,border-color .18s,box-sha
         const response = await fetch('/api/search?q=' + encodeURIComponent(query));
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Search failed.');
+        saveRecentSearch(query);
         lastSearch = {data, query};
         renderSearchResults(data, query);
       } catch (error) { shoppingResults.replaceChildren();searchMessage.textContent = error.message; }
