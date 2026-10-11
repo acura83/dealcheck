@@ -29,6 +29,10 @@ select{width:100%;padding:10px;border:1px solid #d7dfe8;border-radius:9px;backgr
 #selected-offers button{padding:6px 10px;font-size:12px;margin-top:6px!important}#selected-offers a{font-size:12px;margin-top:6px!important}
 @media(max-width:950px){.layout{grid-template-columns:1fr}#comparison-panel{padding:0 10px;height:18vh;max-height:18vh}.comparison-heading{gap:8px;padding:6px 10px}#comparison-panel h2{font-size:14px}#comparison-panel #clear-selection{font-size:12px;padding:6px 8px}}
 #search-message:empty{display:none}
+#shopping-results ol{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;list-style:none;padding:0;margin:16px 0}
+#shopping-results li{min-width:0;margin:0!important;overflow-wrap:anywhere}
+#shopping-results li[hidden]{display:none}
+@media(max-width:650px){#shopping-results ol{grid-template-columns:1fr}}
 </style></head><body>
 <header><nav><div class="brand">Deal<span>Check</span></div><span class="badge">Shop smarter</span></nav></header>
 <main><div class="eyebrow">MAKE EVERY DOLLAR COUNT</div><h1>Good deals. Clear decisions.</h1><p class="intro">Explore product offers and compare discounts with simple numbers, so you can choose with confidence.</p>
