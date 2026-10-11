@@ -15,7 +15,8 @@ h1{font-size:34px;margin:8px 0}.intro{margin:8px 0;max-width:800px}
 </style></head><body>
 <header><nav><div class="brand">Deal<span>Check</span></div><span class="badge">Shop smarter</span></nav></header>
 <main><div class="eyebrow">MAKE EVERY DOLLAR COUNT</div><h1>Good deals. Clear decisions.</h1><p class="intro">Explore product offers and compare discounts with simple numbers, so you can choose with confidence.</p>
-<div class="layout"><section class="card"><h2>Find product deals</h2><p class="hint">Search by item, brand, or exact model.</p><form id="search-form" role="search"><label for="page-search">What are you shopping for?</label><div class="search-row"><input id="page-search" name="q" type="search" required maxlength="200" placeholder="e.g. Got2b Glued Spray 2 oz"><button type="submit">Find deals</button></div><label style="display:flex;align-items:center;gap:8px;font-weight:400"><input id="match-terms" type="checkbox" style="width:auto"> Exact title matching (optional)</label><label for="search-sort">Sort offers by</label><select id="search-sort"><option value="relevance">Most relevant</option><option value="matchprice">Closest matches, then lowest price</option><option value="price">Lowest listed price</option><option value="price-desc">Highest listed price</option><option value="unit">Lowest price per unit</option></select>
+<div class="layout"><section class="card"><h2>Find product deals</h2><p class="hint">Search by item, brand, or exact model.</p><form id="search-form" role="search"><label for="page-search">What are you shopping for?</label><div class="search-row"><input id="page-search" name="q" type="search" required maxlength="200" placeholder="e.g. Got2b Glued Spray 2 oz"><button type="submit">Find deals</button></div><label style="display:flex;align-items:center;gap:8px;font-weight:400"><input id="match-terms" type="checkbox" style="width:auto"> Exact title matching (optional)</label><label for="search-sort">Sort offers by</label><select id="search-sort"><option value="majorprice">Major retailers first, lowest price</option><option value="relevance">Most relevant</option><option value="matchprice">Closest matches, then lowest price</option><option value="price">Lowest listed price</option><option value="price-desc">Highest listed price</option><option value="unit">Lowest price per unit</option></select>
+<label for="retailer-filter">Stores to show</label><select id="retailer-filter"><option value="all">All stores</option><option value="major">Major retailers</option></select><p class="hint">Includes Walmart, Target, Amazon, Home Depot, Lowe’s, Staples, Office Depot, Best Buy, Costco, and more. Marketplace offers may come from third-party sellers. Only stores returned by the shopping search can appear.</p>
 <label for="search-unit">Unit for size comparison</label><select id="search-unit"><option value="oz">Ounce (weight)</option><option value="floz">Fluid ounce (volume)</option><option value="g">Gram</option><option value="ml">Milliliter</option><option value="item">Item / count</option></select>
 <p class="hint">For unit-price searches, enter brand and product without a size to compare different packages. Sizes are read from titles; verify them with the retailer. Multipacks and unclear sizes are not ranked by unit price.</p><p class="hint">Change sorting after searching—no new search needed. Closest matching checks whole title words and prioritizes model and size terms. For closer matches, include brand, model, size, and quantity. Broad searches show related offers; use exact title matching to narrow them. Shipping and taxes are not included.</p></form><section class="results" id="results-box" aria-labelledby="results-heading"><h2 id="results-heading">Shopping results</h2><p id="search-message" role="status" aria-live="polite"></p><div id="shopping-results"></div></section><div class="note"><small>Lowest listed price among matching returned offers—not every store. Title matching cannot verify product equivalence. Check product size, shipping, and availability with the retailer.</small></div></section>
 <section class="card" aria-labelledby="true-cost-heading">
@@ -52,6 +53,11 @@ h1{font-size:34px;margin:8px 0}.intro{margin:8px 0;max-width:800px}
       const match = String(item.price || '').trim().match(/^(?:US\s*)?\$\s*(\d+(?:,\d{3})*(?:\.\d{1,2})?)$/);
       return match ? Number(match[1].replace(/,/g, '')) : null;
     }
+    // Match complete retailer names, including domain names and marketplace labels.
+    function isMajorRetailer(store) {
+      const name=String(store || '').toLowerCase().replace(/[’']/g,'').replace(/[^a-z0-9]+/g,' ').trim();
+      return /\b(walmart|target|amazon|home depot|homedepot|lowes|staples|office depot|officedepot|officemax|office max|best buy|bestbuy|costco|sams club|walgreens|cvs|kroger|macys|kohls|sephora|ulta|dicks sporting goods|bjs)\b/.test(name);
+    }
     function rankOffers(offers, query, strict, sortMode = 'price', unit = 'oz') {
       const normalize = text => String(text || '').toLowerCase().replace(/ounces?/g,'oz').replace(/millilit(?:er|re)s?/g,'ml').replace(/grams?/g,'g').replace(/(\d)(oz|ml|g)\b/g,'$1 $2');
       const words = text => (normalize(text).match(/[a-z0-9]+(?:\.[0-9]+)?/g) || []).map(word => word.length > 3 && word.endsWith('s') && !word.endsWith('ss') ? word.slice(0,-1) : word);
@@ -71,6 +77,7 @@ h1{font-size:34px;margin:8px 0}.intro{margin:8px 0;max-width:800px}
         if (seen.has(identity)) return false;
         seen.add(identity); return true;
       }).sort((a,b) => {
+        if (sortMode === 'majorprice' && isMajorRetailer(a.store) !== isMajorRetailer(b.store)) return Number(isMajorRetailer(b.store))-Number(isMajorRetailer(a.store));
         if (['relevance','matchprice'].includes(sortMode) && a.fullMatch !== b.fullMatch) return Number(b.fullMatch)-Number(a.fullMatch);
         if (sortMode === 'relevance' && a.relevance !== b.relevance) return b.relevance-a.relevance;
         const valueA = sortMode === 'unit' ? a.unitPrice : a.numericPrice;
@@ -90,8 +97,10 @@ h1{font-size:34px;margin:8px 0}.intro{margin:8px 0;max-width:800px}
       shoppingResults.replaceChildren();
                 const sortMode = document.getElementById('search-sort').value;
         const searchUnit = document.getElementById('search-unit').value;
-        const ranked = rankOffers(data.results, query, document.getElementById('match-terms').checked, sortMode, searchUnit);
-        searchMessage.textContent = ranked.length ? 'Showing ' + ranked.length + ' matching offers, ' + (sortMode === 'unit' ? 'known unit prices first; unverified sizes last' : sortMode === 'relevance' ? 'closest title matches first; model and size terms receive extra weight' : sortMode === 'matchprice' ? 'all search terms matched first, then lowest price' : sortMode === 'price-desc' ? 'highest listed price first' : 'lowest listed price first') + ' · Retrieved ' + new Date(data.searchedAt).toLocaleString() : 'No matching offers. Try different words or turn off title matching and search again.';
+        const majorOnly = document.getElementById('retailer-filter').value === 'major';
+        const offers = majorOnly ? data.results.filter(item => isMajorRetailer(item.store)) : data.results;
+        const ranked = rankOffers(offers, query, document.getElementById('match-terms').checked, sortMode, searchUnit);
+        searchMessage.textContent = ranked.length ? 'Showing ' + ranked.length + (majorOnly ? ' major-retailer offers, ' : ' matching offers, ') + (sortMode === 'majorprice' ? 'major retailers first, lowest to highest price within each group' : sortMode === 'unit' ? 'known unit prices first; unverified sizes last' : sortMode === 'relevance' ? 'closest title matches first; model and size terms receive extra weight' : sortMode === 'matchprice' ? 'all search terms matched first, then lowest price' : sortMode === 'price-desc' ? 'highest listed price first' : 'lowest listed price first') + ' · Retrieved ' + new Date(data.searchedAt).toLocaleString() : majorOnly ? 'No matching major-retailer offers were returned. Switch Stores to show to All stores, or try a different search.' : 'No matching offers. Try different words or turn off title matching and search again.';
         const list = document.createElement('ol');
         ranked.forEach((item, index) => {
           const card = document.createElement('li');
@@ -106,6 +115,12 @@ h1{font-size:34px;margin:8px 0}.intro{margin:8px 0;max-width:800px}
           const title = document.createElement('p'); title.textContent = item.title;
           const info = document.createElement('p'); info.textContent = item.price + ' — ' + item.store;
           card.append(title, info);
+          if (sortMode === 'majorprice') {
+            const retailerLabel=document.createElement('p');
+            retailerLabel.className='hint';
+            retailerLabel.textContent=isMajorRetailer(item.store) ? 'Major retailer' : 'Other store';
+            card.append(retailerLabel);
+          }
           const matchInfo = document.createElement('p');
           matchInfo.className = 'hint';
           matchInfo.textContent = item.fullMatch ? 'All search terms found in title' : item.matchedCount + ' of ' + item.termCount + ' search terms found in title';
@@ -160,7 +175,7 @@ h1{font-size:34px;margin:8px 0}.intro{margin:8px 0;max-width:800px}
         }
 
     }
-    ['search-sort','search-unit','match-terms'].forEach(id => document.getElementById(id).addEventListener('change', () => {
+    ['search-sort','search-unit','match-terms','retailer-filter'].forEach(id => document.getElementById(id).addEventListener('change', () => {
       if (lastSearch) renderSearchResults(lastSearch.data, lastSearch.query);
     }));
     document.getElementById('search-form').addEventListener('submit', async event => {
