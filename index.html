@@ -18,7 +18,7 @@ h1{font-size:34px;margin:8px 0}.intro{margin:8px 0;max-width:800px}
 select{width:100%;padding:10px;border:1px solid #d7dfe8;border-radius:9px;background:#fff;font:inherit}
 #comparison-panel{position:fixed;bottom:0;left:0;right:0;z-index:100;background:#fff;border-radius:18px 18px 0 0;box-shadow:0 -8px 32px #17273b24;height:15vh;max-height:15vh;overflow:auto;padding:8px 18px;border-top:2px solid #187c69}
 #comparison-panel[hidden]{display:none}
-#comparison-panel h2{display:inline-block;margin-right:14px;font-size:17px}
+.comparison-heading{display:flex;align-items:center;gap:14px;flex-wrap:wrap}#comparison-panel h2{margin:0;font-size:17px}
 #comparison-panel>p.hint{margin:6px 0;font-size:12px}
 #comparison-panel #clear-selection{padding:8px 12px;font-size:13px}
 #selected-offers{display:flex;gap:10px;overflow-x:auto;margin-top:8px!important;padding-bottom:4px}
@@ -39,9 +39,7 @@ select{width:100%;padding:10px;border:1px solid #d7dfe8;border-radius:9px;backgr
 </div>
 
 <section id="comparison-panel" class="card" aria-labelledby="true-cost-heading" hidden>
-<h2 id="true-cost-heading">Compare the true cost</h2>
-<p class="hint">Check items in shopping results to compare their listed product prices side by side.</p>
-<button id="clear-selection" type="button" style="background:#eef3f0;color:#187c69">Clear selected items</button>
+<div class="comparison-heading"><h2 id="true-cost-heading">Compare the true cost</h2><button id="clear-selection" type="button" style="background:#eef3f0;color:#187c69">Clear selected items</button></div>
 <div id="selected-offers" style="margin-top:20px"></div>
 <p id="selection-status" role="status" aria-live="polite"></p>
 <p class="hint">Listed prices already include any advertised markdown; savings are not deducted again. Totals exclude shipping, tax, and other fees. Compare equivalent products and sizes.</p></section>
