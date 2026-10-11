@@ -218,6 +218,20 @@ function renderSelectedOffers() {
     line('Price: '+cash(costs.price));
 
     line('Total price (excluding shipping and tax): '+cash(costs.total));
+    let buyingUrl;
+    try {
+      const url=new URL(entry.item.link);
+      if (url.protocol==='https:') buyingUrl=url.href;
+    } catch {}
+    if (buyingUrl) {
+      const buyingLink=document.createElement('a');
+      buyingLink.href=buyingUrl;buyingLink.target='_blank';buyingLink.rel='noopener noreferrer';
+      buyingLink.textContent='View original buying site';
+      buyingLink.style.cssText='display:block;margin-top:12px;font-weight:600;';
+      card.append(buyingLink);
+    } else {
+      line('Buying site link unavailable for this offer.');
+    }
     const remove=document.createElement('button');remove.type='button';remove.textContent='Remove';remove.style.marginTop='12px';
     remove.addEventListener('click',()=>{selectedOffers.delete(key);syncSelectionBoxes();renderSelectedOffers();});card.append(remove);box.append(card);
   });
