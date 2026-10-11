@@ -16,7 +16,7 @@ h1{font-size:34px;margin:8px 0}.intro{margin:8px 0;max-width:800px}
 .layout{grid-template-columns:minmax(0,3fr) minmax(0,7fr)}
 .results-panel .results{border-top:0;margin-top:0;padding-top:0}
 select{width:100%;padding:10px;border:1px solid #d7dfe8;border-radius:9px;background:#fff;font:inherit}
-#comparison-panel{position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;flex-direction:column;background:transparent;border:0;border-radius:0;box-shadow:none;height:18vh;max-height:18vh;overflow:visible;padding:0 18px}
+#comparison-panel{position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;flex-direction:column;background:transparent;border:0;border-radius:0;box-shadow:none;height:20vh;max-height:20vh;overflow:visible;padding:0 18px}
 #comparison-panel[hidden]{display:none}
 .comparison-heading{display:flex;align-items:center;gap:14px;flex-wrap:wrap;flex-shrink:0;align-self:flex-start;background:#edf7f2;border:1px solid #b8d8cb;border-bottom:0;border-radius:16px 20px 0 0;padding:8px 18px;position:relative;z-index:2;box-shadow:0 -4px 14px #17273b10;max-width:100%}#comparison-panel h2{margin:0;font-size:17px}
 .comparison-body{background:#fff;border:1px solid #b8d8cb;border-top:2px solid #187c69;border-radius:0 14px 0 0;box-shadow:0 -6px 24px #17273b14;padding:8px 14px;overflow:auto;flex:1;min-height:0}.comparison-body>p.hint{margin:6px 0;font-size:12px}
@@ -27,7 +27,7 @@ select{width:100%;padding:10px;border:1px solid #d7dfe8;border-radius:9px;backgr
 #selected-offers h3{margin:0 0 4px;font-size:13px}
 #selection-status{margin:6px 0;font-size:13px}
 #selected-offers button{padding:6px 10px;font-size:12px;margin-top:6px!important}#selected-offers a{font-size:12px;margin-top:6px!important}
-@media(max-width:950px){.layout{grid-template-columns:1fr}#comparison-panel{padding:0 10px;height:18vh;max-height:18vh}.comparison-heading{gap:8px;padding:6px 10px}#comparison-panel h2{font-size:14px}#comparison-panel #clear-selection{font-size:12px;padding:6px 8px}}
+@media(max-width:950px){.layout{grid-template-columns:1fr}#comparison-panel{padding:0 10px;height:20vh;max-height:20vh}.comparison-heading{gap:8px;padding:6px 10px}#comparison-panel h2{font-size:14px}#comparison-panel #clear-selection{font-size:12px;padding:6px 8px}}
 #search-message:empty{display:none}
 #shopping-results ol{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;list-style:none;padding:0;margin:16px 0}
 #shopping-results li{min-width:0;margin:0!important;overflow-wrap:anywhere}
@@ -46,7 +46,7 @@ select{width:100%;padding:10px;border:1px solid #d7dfe8;border-radius:9px;backgr
   .search-row{flex-direction:column}.search-row button{width:100%;min-height:44px}
   #shopping-results ol{grid-template-columns:minmax(0,1fr);gap:12px}
   #shopping-results a{display:inline-block;padding:10px 0;min-height:44px}
-  #comparison-panel{padding:0 6px;height:18dvh;max-height:18dvh}
+  #comparison-panel{padding:0 6px;height:20dvh;max-height:20dvh}
   .comparison-heading{gap:8px;padding:5px 8px;flex-wrap:nowrap;width:100%;border-radius:12px 12px 0 0}
   #comparison-panel h2{font-size:13px;flex:1;min-width:0}
   #comparison-panel #clear-selection{font-size:11px;padding:6px 8px;min-height:36px;white-space:nowrap}
@@ -55,6 +55,18 @@ select{width:100%;padding:10px;border:1px solid #d7dfe8;border-radius:9px;backgr
   #selected-offers>article{flex-basis:min(250px,80vw)}
   #selected-offers button,#selected-offers a{min-height:36px;display:inline-flex;align-items:center}
 }
+
+.comparison-body{padding:4px 10px}
+#selected-offers{margin-top:0!important;gap:10px}
+#selected-offers>article{flex:1 0 220px;max-width:320px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 8px;padding:7px 10px!important;align-items:center}
+#selected-offers h3{grid-column:1/-1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0!important;font-size:13px}
+#selected-offers p{margin:0;font-size:11px}
+#selected-offers .hint{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.comparison-price{grid-column:2;grid-row:2;font-size:17px;color:#187c69}
+.comparison-actions{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:10px}
+#selected-offers .comparison-actions a,#selected-offers .comparison-actions button{margin-top:0!important;min-height:28px;padding:4px 8px;font-size:11px}
+#selection-status{margin:3px 0;font-size:11px}
+@media(max-width:650px){#selected-offers>article{flex:0 0 220px}.comparison-price{font-size:15px}}
 </style></head><body>
 <header><nav><div class="brand">Deal<span>Check</span></div><span class="badge">Shop smarter</span></nav></header>
 <main><div class="eyebrow">MAKE EVERY DOLLAR COUNT</div><h1>Good deals. Clear decisions.</h1><p class="intro">Explore product offers and compare discounts with simple numbers, so you can choose with confidence.</p>
@@ -66,10 +78,10 @@ select{width:100%;padding:10px;border:1px solid #d7dfe8;border-radius:9px;backgr
 </div>
 
 <section id="comparison-panel" class="card" aria-labelledby="true-cost-heading" hidden>
-<div class="comparison-heading"><h2 id="true-cost-heading">Compare the true cost</h2><button id="clear-selection" type="button" style="background:#eef3f0;color:#187c69">Clear selected items</button></div>
+<div class="comparison-heading"><h2 id="true-cost-heading">Compare item list</h2><button id="clear-selection" type="button" style="background:#eef3f0;color:#187c69">Clear selected items</button></div>
 <div class="comparison-body"><div id="selected-offers" style="margin-top:20px"></div>
 <p id="selection-status" role="status" aria-live="polite"></p>
-<p class="hint">Listed prices already include any advertised markdown; savings are not deducted again. Totals exclude shipping, tax, and other fees. Compare equivalent products and sizes.</p></div></section>
+</div></section>
 <footer>DealCheck · Thoughtful shopping starts with a clear comparison.</footer></main>
 <script>
     // Match words against titles, deduplicate offers, and sort known prices first.
@@ -186,7 +198,7 @@ select{width:100%;padding:10px;border:1px solid #d7dfe8;border-radius:9px;backgr
           const markdown = offerCosts(item, null).savings;
           if (markdown !== null && markdown > 0) {
             const saving = document.createElement('p');
-            saving.textContent = 'Save ' + cash(markdown) + ' versus the listed original price';
+            saving.textContent = 'Save ' + cash(markdown) + ' vs. original price';
             saving.style.cssText = 'color:#187c69;font-weight:600;';
             card.append(saving);
           }
@@ -284,7 +296,7 @@ function renderSelectedOffers() {
   }
   selectedOffers.forEach((entry,key) => {
     const card=document.createElement('article');card.style.cssText='border:1px solid #e2e8ef;border-radius:12px;padding:18px;margin-bottom:14px;';
-    const heading=document.createElement('h3');heading.textContent=entry.item.title;heading.style.margin='0 0 8px';
+    const heading=document.createElement('h3');heading.textContent=entry.item.title;heading.title=entry.item.title;heading.style.margin='0 0 8px';
     const store=document.createElement('p');store.textContent=entry.item.store;store.className='hint';card.append(heading,store);
     const costs=offerCosts(entry.item);
     if (costs.savings !== null && costs.savings > 0) {
@@ -292,9 +304,10 @@ function renderSelectedOffers() {
       saving.style.cssText='color:#187c69;font-weight:600;';card.append(saving);
     }
     const line=text=>{const p=document.createElement('p');p.textContent=text;card.append(p);};
-    line('Price: '+cash(costs.price));
+    const price=document.createElement('strong');price.className='comparison-price';price.textContent=cash(costs.price);price.title='Listed total, excluding shipping and tax';card.append(price);
 
-    line('Total price (excluding shipping and tax): '+cash(costs.total));
+
+    const actions=document.createElement('div');actions.className='comparison-actions';
     let buyingUrl;
     try {
       const url=new URL(entry.item.link);
@@ -303,20 +316,20 @@ function renderSelectedOffers() {
     if (buyingUrl) {
       const buyingLink=document.createElement('a');
       buyingLink.href=buyingUrl;buyingLink.target='_blank';buyingLink.rel='noopener noreferrer';
-      buyingLink.textContent='View original buying site';
+      buyingLink.textContent='View store';buyingLink.title='View original buying site';
       buyingLink.style.cssText='display:block;margin-top:12px;font-weight:600;';
-      card.append(buyingLink);
+      actions.append(buyingLink);
     } else {
       line('Buying site link unavailable for this offer.');
     }
     const remove=document.createElement('button');remove.type='button';remove.textContent='Remove';remove.style.marginTop='12px';
-    remove.addEventListener('click',()=>{selectedOffers.delete(key);syncSelectionBoxes();renderSelectedOffers();});card.append(remove);box.append(card);
+    remove.addEventListener('click',()=>{selectedOffers.delete(key);syncSelectionBoxes();renderSelectedOffers();});actions.append(remove);card.append(actions);box.append(card);
   });
   const totals=[...selectedOffers.values()].map(entry=>offerCosts(entry.item).total);
   const known=totals.filter(total=>total!==null);
   const status=document.getElementById('selection-status');
   status.textContent=selectedOffers.size+' item'+(selectedOffers.size===1?'':'s')+' selected.';
-  if (known.length && selectedOffers.size>1) status.textContent+=' Lowest listed price (excluding shipping and tax): '+cash(Math.min(...known))+'.'+(known.length<totals.length?' Some totals remain unknown.':'');
+  if (known.length && selectedOffers.size>1) status.textContent+=' Lowest: '+cash(Math.min(...known))+'.'+(known.length<totals.length?' Some totals remain unknown.':'');
 }
 function syncSelectionBoxes() {
   document.querySelectorAll('input[data-offer-key]').forEach(input=>input.checked=selectedOffers.has(input.dataset.offerKey));
