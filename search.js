@@ -226,6 +226,10 @@ function renderSearchResults(data, query) {
 }));
 document.getElementById('search-form').addEventListener('submit', async event => {
   event.preventDefault();
+  if (typeof selectedOffers === 'undefined' || typeof renderSelectedOffers !== 'function') {
+    searchMessage.textContent = 'Comparison code did not load. Upload comparison.js and refresh the page.';
+    return;
+  }
   const query = searchInput.value.trim();
   if (!query) { searchMessage.textContent = 'Enter an item name.'; return; }
   lastSearch = null;

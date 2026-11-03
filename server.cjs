@@ -32,8 +32,11 @@ const server = http.createServer(async (req, res) => {
   };
   const publicFile = publicFiles[url.pathname];
   if (publicFile && Object.hasOwn(publicFiles, url.pathname)) {
+    let content;
+    try {content = fs.readFileSync(path.join(__dirname, publicFile[0]));}
+    catch {return send(res, 503, {error:'A required app file is missing. Upload all DealCheck files and redeploy.'});}
     res.writeHead(200, {'Content-Type': publicFile[1] + '; charset=utf-8'});
-    return res.end(fs.readFileSync(path.join(__dirname, publicFile[0])));
+    return res.end(content);
   }
   if (url.pathname === '/api/history') {
     const result = await history((url.searchParams.get('asin') || '').trim().toUpperCase());
