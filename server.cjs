@@ -2,6 +2,8 @@ const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
 const key = process.env.SERPAPI_KEY;
+const {createHistoryHandler} = require('./trackpin.cjs');
+const history = createHistoryHandler({key:process.env.TRACKPIN_API_KEY});
 const cache = new Map();
 let requestsThisRun = 0;
 const allowedOrigins = new Set(['https://phillykbeautytown.com', 'https://www.phillykbeautytown.com']);
@@ -18,9 +20,24 @@ const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://127.0.0.1:3000');
   if (url.pathname === '/health') return send(res, 200, {ok:true});
   if (req.method !== 'GET') return send(res, 405, {error:'Only GET requests are supported.'});
-  if (url.pathname === '/' || url.pathname === '/index.html') {
-    res.writeHead(200, {'Content-Type':'text/html; charset=utf-8'});
-    return res.end(fs.readFileSync(path.join(__dirname, 'index.html')));
+  // Serve only these public files. Environment settings and server code stay private.
+  const publicFiles = {
+    '/': ['index.html', 'text/html'],
+    '/index.html': ['index.html', 'text/html'],
+    '/styles.css': ['styles.css', 'text/css'],
+    '/search.js': ['search.js', 'text/javascript'],
+    '/comparison.js': ['comparison.js', 'text/javascript'],
+    '/page.js': ['page.js', 'text/javascript'],
+    '/history.js': ['history.js', 'text/javascript'],
+  };
+  const publicFile = publicFiles[url.pathname];
+  if (publicFile && Object.hasOwn(publicFiles, url.pathname)) {
+    res.writeHead(200, {'Content-Type': publicFile[1] + '; charset=utf-8'});
+    return res.end(fs.readFileSync(path.join(__dirname, publicFile[0])));
+  }
+  if (url.pathname === '/api/history') {
+    const result = await history((url.searchParams.get('asin') || '').trim().toUpperCase());
+    return send(res, result.status, result.data);
   }
   if (url.pathname !== '/api/search') return send(res, 404, {error:'Not found.'});
   if (!key) return send(res, 503, {error:'Search is not configured. Add SERPAPI_KEY in the hosting environment settings.'});
